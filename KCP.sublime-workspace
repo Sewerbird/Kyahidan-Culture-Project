@@ -1,0 +1,782 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"latL",
+				"latLngToEquirectangularPx"
+			],
+			[
+				"shadow",
+				"SHADOWMAP_TYPE_PCF_SOFT"
+			],
+			[
+				"Soft",
+				"SHADOWMAP_TYPE_PCF_SOFT"
+			],
+			[
+				"degree",
+				"degree_type_id"
+			],
+			[
+				"syste",
+				"systemmajor_id"
+			],
+			[
+				"testid_de",
+				"testid_chooseDegreeType"
+			],
+			[
+				"pub",
+				"publish_cb"
+			],
+			[
+				"query",
+				"queryServer"
+			],
+			[
+				"ranking",
+				"ranking"
+			],
+			[
+				"tui",
+				"tuition"
+			],
+			[
+				"fac",
+				"faculty"
+			],
+			[
+				"facu",
+				"faculty_clause"
+			],
+			[
+				"deg",
+				"degree_type_id"
+			],
+			[
+				"offer",
+				"offer"
+			],
+			[
+				"Configuration",
+				"ConfigurationScreen"
+			],
+			[
+				"view",
+				"viewElements"
+			],
+			[
+				"enshou",
+				"enshroudedScreen"
+			],
+			[
+				"Ini",
+				"InitializingScreen"
+			],
+			[
+				"initi",
+				"initializingScreen"
+			],
+			[
+				"init",
+				"initializingScreen"
+			],
+			[
+				"load",
+				"loadScreen"
+			],
+			[
+				"prot",
+				"prototype"
+			],
+			[
+				"tint",
+				"tintdirection"
+			],
+			[
+				"backgrou",
+				"background-color"
+			],
+			[
+				"map_",
+				"map_container"
+			],
+			[
+				"wp_en",
+				"wp_enqueue_script"
+			],
+			[
+				"Goo",
+				"GoogleMapBoxProvider"
+			],
+			[
+				"Map",
+				"MapBoxProtocol"
+			],
+			[
+				"pro",
+				"prototype"
+			],
+			[
+				"midP",
+				"midpointDisplacementR"
+			],
+			[
+				"midpointD",
+				"midpointDisplacementR"
+			],
+			[
+				"db_",
+				"db_ref_score"
+			],
+			[
+				"cre",
+				"createTextNode"
+			],
+			[
+				"fill",
+				"fill-opacity"
+			],
+			[
+				"h",
+				"HOPE_LIVES"
+			],
+			[
+				"get",
+				"getElementById"
+			],
+			[
+				"MAX",
+				"MAX_EXPLOSIONS_SEEN"
+			],
+			[
+				"explos",
+				"explosionstate"
+			],
+			[
+				"strok",
+				"stroke-width"
+			],
+			[
+				"or",
+				"orange"
+			],
+			[
+				"price",
+				"priceBeliefs"
+			],
+			[
+				"pric",
+				"priceBeliefs"
+			],
+			[
+				"_vali",
+				"_validateIsPlayer"
+			],
+			[
+				"provin",
+				"province_id"
+			],
+			[
+				"calc",
+				"calculateNewEffectiveTaxValue"
+			],
+			[
+				"setA",
+				"setArmyMarchingOrders"
+			],
+			[
+				"Data",
+				"DataActionInfo"
+			],
+			[
+				"craf",
+				"crafter_ppl"
+			],
+			[
+				"instant",
+				"instantiateProvinces"
+			],
+			[
+				"rand",
+				"randomEstimation"
+			],
+			[
+				"quantity",
+				"quantityTraded"
+			],
+			[
+				"quantit",
+				"quantityTraded"
+			],
+			[
+				"for",
+				"for	for (…) {…}"
+			],
+			[
+				"deter",
+				"determinePriceOf"
+			]
+		]
+	},
+	"buffers":
+	[
+		{
+			"file": "README.md",
+			"settings":
+			{
+				"buffer_size": 1399,
+				"line_ending": "Unix",
+				"name": "# The Kyahidan Culture Project"
+			}
+		}
+	],
+	"build_system": "",
+	"build_system_choices":
+	[
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 392.0,
+		"last_filter": "Resource",
+		"selected_items":
+		[
+			[
+				"Resource",
+				"MavensMate: Create Resource Bundle..."
+			]
+		],
+		"width": 575.0
+	},
+	"console":
+	{
+		"height": 120.0,
+		"history":
+		[
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"file_history":
+	[
+		"/Users/edwardmiller/Documents/Ed's_Hobbies/Coding/EIC/ Redis Lecture.md",
+		"/Users/edwardmiller/Documents/Ed's_Hobbies/Codersfield Workshops/Procedural Terrain Generation/Useful Links.txt",
+		"/Users/edwardmiller/Documents/Ed's_Hobbies/Codersfield Workshops/Procedural Terrain Generation/terrain13.js",
+		"/Users/edwardmiller/Documents/Ed's_Hobbies/Codersfield Workshops/Procedural Terrain Generation/terrain14.js",
+		"/Users/edwardmiller/Documents/Ed's_Hobbies/Codersfield Workshops/Procedural Terrain Generation/terrain15.js",
+		"/Users/edwardmiller/Documents/Ed's_Hobbies/Codersfield Workshops/Procedural Terrain Generation/jsFiddleHeader.html",
+		"/Users/edwardmiller/Documents/Ed's_Hobbies/Codersfield Workshops/Procedural Terrain Generation/3d.html",
+		"/Users/edwardmiller/Documents/Ed's_Hobbies/Codersfield Workshops/Procedural Terrain Generation/Promotionals.txt",
+		"/Users/edwardmiller/Documents/Ed's_Hobbies/Website/sewerbird.github.io/_config.yml",
+		"/Users/edwardmiller/Documents/Ed's_Hobbies/Codersfield Workshops/Procedural Terrain Generation/terrain10.js",
+		"/Users/edwardmiller/Documents/Ed's_Hobbies/Codersfield Workshops/Procedural Terrain Generation/terrain11.js",
+		"/Users/edwardmiller/Documents/Ed's_Hobbies/Codersfield Workshops/Procedural Terrain Generation/terrain12.js",
+		"/Users/edwardmiller/Documents/Ed's_Hobbies/Codersfield Workshops/Procedural Terrain Generation/Writeup.md",
+		"/Users/edwardmiller/Documents/Ed's_Hobbies/Codersfield Workshops/Procedural Terrain Generation/terrain9.js",
+		"/Users/edwardmiller/Documents/Ed's_Hobbies/Codersfield Workshops/Procedural Terrain Generation/terrain8.js",
+		"/Users/edwardmiller/Documents/Ed's_Hobbies/Codersfield Workshops/Procedural Terrain Generation/terrain7.js",
+		"/Users/edwardmiller/Documents/Ed's_Hobbies/Codersfield Workshops/Procedural Terrain Generation/terrain6.js",
+		"/Users/edwardmiller/Documents/Ed's_Hobbies/Codersfield Workshops/Procedural Terrain Generation/terrain5.js",
+		"/Users/edwardmiller/Documents/Ed's_Hobbies/Codersfield Workshops/Procedural Terrain Generation/terrain4.js",
+		"/Users/edwardmiller/Documents/Ed's_Hobbies/Codersfield Workshops/Procedural Terrain Generation/terrain3.js",
+		"/Users/edwardmiller/Documents/Ed's_Hobbies/Codersfield Workshops/Procedural Terrain Generation/terrain2.js",
+		"/Users/edwardmiller/Documents/Ed's_Hobbies/Codersfield Workshops/Procedural Terrain Generation/terrain1.js",
+		"/Users/edwardmiller/Documents/Ed's_Hobbies/Codersfield Workshops/Procedural Terrain Generation/TerrainEditor.html",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/EIC/Salesforce/SchoolSearch/src/WidgetTest.html",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/EIC/Salesforce/SchoolSearch/src/staticresources/SchoolDBSearchWidget.js",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/EIC/Salesforce/SchoolSearch/src/tests/SchoolDBSearchWidgetTest.js",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/EIC/Salesforce/Salesforce DB Search Widget (V)/src/WidgetTest.html",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/EIC/Salesforce/Salesforce DB Search Widget (V)/src/staticresources/SchoolDBSearchWidget.js",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/EIC/Salesforce/Salesforce DB Search Widget (V)/src/tests/SchoolDBSearchWidgetTest.js",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/EIC/Salesforce/Salesforce DB Search Widget (V)/src/tests/PhantomHook.js",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/EIC/Salesforce/Salesforce DB Search Widget (V)/src/tests/SchoolDBSearchWidgetTest-b.js",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/EIC/Salesforce/Salesforce DB Search Widget (V)/src/components/SchoolDBSearchWidget.component",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/EIC/Salesforce/Salesforce DB Search Widget (V)/src/pages/DBSearchTestPage.page",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/EIC/Salesforce/SchoolSearch/How To Set Up.md",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/EIC/Salesforce/Salesforce DB Search Widget (V)/src/classes/SchoolDBSearchWidgetTest.cls",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/EIC/Salesforce/Salesforce DB Search Widget (V)/src/package.json",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/EIC/Salesforce/Salesforce DB Search Widget (V)/src/WidgetTest.js",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/EIC/Salesforce/Salesforce DB Search Widget (V)/Salesforce-SchoolDBSearchWidget/SchoolDBSearchWidget.js",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/EIC/Salesforce/Salesforce DB Search Widget (V)/src/components/How To Set Up.md",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/EIC/Salesforce/Salesforce DB Search Widget (V)/src/package.xml",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/EIC/Salesforce/Salesforce DB Search Widget (V)/src/components/FooComponent.component",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/EIC/Salesforce/Salesforce DB Search Widget (V)/src/classes/FooTest.cls",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/EIC/Salesforce/Salesforce DB Search Widget (V)/src/classes/FooClass.cls",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/EIC/Salesforce/Salesforce DB Search Widget (V)/Salesforce-SchoolDBSearchWidget/SchoolDBSearchWidget.vfc",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/EIC/Salesforce/Salesforce DB Search Widget (V)/src/staticresources/staticresources.resource",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/EIC/Salesforce/Salesforce DB Search Widget (V)/static/typeahead.bundle.min.js",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/EIC/Salesforce/Salesforce DB Search Widget (V)/src/staticresources/bootstrap.min.js",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/EIC/vagrant/vagrant_data/product_api/api/models/School.js",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/EIC/vagrant/vagrant_data/product_api/api/models/Country.js",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/EIC/vagrant/vagrant_data/product_api/api/models/Degreetype.js",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/EIC/vagrant/vagrant_data/product_api/api/models/Faculty.js",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/EIC/vagrant/vagrant_data/product_api/api/models/Schoolmajor.js",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/EIC/vagrant/vagrant_data/product_api/package.json",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/EIC/vagrant/vagrant_data/product_api/api/controllers/FileController.js",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/EIC/vagrant/vagrant_data/product_api/api/controllers/FooController.js",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/EIC/vagrant/vagrant_data/product_api/api/controllers/PadToolSearchPointController.js",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/EIC/vagrant/vagrant_data/system_major_school_major.sql",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/EIC/vagrant/vagrant_data/product_api/node_modules/sails/lib/app/private/loadHooks.js",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/EIC/vagrant/vagrant_data/product_api/config/models.js",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/EIC/vagrant/Vagrantfile",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/EIC/vagrant/Vagrantfile.old",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/EIC/vagrant/vagrant_data/product_api/api/models/Systemmajor.js",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/EIC/vagrant/vagrant_data/school.sql",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/EIC/vagrant/vagrant_data/product_api/tasks/register/default.js",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/EIC/vagrant/vagrant_data/product_api/tasks/register/linkAssets.js",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/EIC/vagrant/vagrant_data/product_api/tasks/config/watch.js",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/EIC/vagrant/vagrant_data/product_api/tasks/config/orm.js",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/EIC/vagrant/vagrant_data/product_api/tasks/register/build.js",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/EIC/vagrant/vagrant_data/product_api/tasks/register/compileAssets.js",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/EIC/vagrant/vagrant_data/product_api/Gruntfile.js",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/EIC/demo.rb",
+		"/Users/edwardmiller/.ssh/id_rsa.pub",
+		"/Users/edwardmiller/.ssh/id_rsa",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/The Nendhe/Ordovician/ZipfdistroNendhe.js",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/The Nendhe/Ordovician/Nendhe - Early Earth Analogue",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Website/sewerbird.github.io/_site/about.html",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Chinese Learning/vocab.json",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/The Nendhe/Ordovician/Nendhe - Devonian Variant Analogue",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Birthday Letter: From Ed '15 to Ed '16",
+		"/Users/edwardmiller/Library/Application Support/Steam/steamapps/common/Kerbal Space Program/saves/Soarbird Tourism!/quicksave.sfs",
+		"/Users/edwardmiller/Library/Application Support/Steam/steamapps/common/Kerbal Space Program/saves/AeroFoo Industries/quicksave.sfs",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/The Nendhe/Ordovician/I10-68-Silurian.jpg",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/ProjectTemplate/MYGAME/public/css/style.css",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/ProjectTemplate/MYGAME/public/js/ui/PlayingScreen",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/ProjectTemplate/MYGAME/public/js/ui/MenuScreen.js",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/ProjectTemplate/MYGAME/public/js/ui/ConfiguringScreen.js",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/ProjectTemplate/MYGAME/public/js/ui/LandingScreen.js",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/ProjectTemplate/MYGAME/public/js/ui/InitializingScreen.js",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/ProjectTemplate/MYGAME/public/js/game.js",
+		"/Users/edwardmiller/Library/Application Support/Sublime Text 3/Packages/User/Preferences.sublime-settings",
+		"/Users/edwardmiller/Library/Application Support/Sublime Text 3/Packages/User/JavaScript.sublime-settings",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/ProjectTemplate/public/js/client.js",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/ProjectTemplate/app.js",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/ProjectTemplate/README.md",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/ProjectTemplate/package.json",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/ProjectTemplate/views/index.ejs",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/ProjectTemplate/routes/index.js",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/The Nendhe/Small Early Earth Analogue/Possible Nendhe Scenario",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/WenXi/XStreets/wp-content/themes/javo-directory-ed-child/assets/js/GoogleMapBoxProvider.js",
+		"/Users/edwardmiller/Documents/Baldur's Gate - Enhanced Edition/Baldur.ini",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/WenXi/XStreets/wp-content/themes/javo-directory-ed-child/functions.php",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/WenXi/XStreets/wp-content/themes/javo-directory-ed-child/templates/tp-javo-map-box.php",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/WenXi/XStreets/wp-content/themes/javo-directory-ed-child/templates/parts/single-item-tab.php",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/WenXi/XStreets/wp-content/themes/javo-directory 2/library/enqueue.php",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/WenXi/XStreets/wp-content/themes/index.php",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/WenXi/XStreets/wp-blog-header.php",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/WenXi/XStreets/index.php",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Website/sewerbird.github.io/_drafts/test draft",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/WenXi/XStreets/wp-content/themes/javo-directory 2/templates/parts/single-item-tab.php",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/WenXi/XStreets/wp-content/themes/javo-directory-ed-child/assets/js/SingleMapBoxProtocol.js",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/WenXi/XStreets/wp-content/themes/javo-directory-ed-child/assets/js/GoogleSingleMapBoxProvider.js",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/WenXi/XStreets/wp-content/themes/javo-directory-ed-child/assets/js/BaiduMapBoxProvider.js",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/WenXi/XStreets/wp-content/themes/javo-directory 2/templates/parts/part-single-maps.php",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/WenXi/XStreets/wp-content/themes/javo-directory 2/templates/parts/single-item-one-page.php",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/WenXi/XStreets/wp-content/themes/javo-directory-ed-child/templates/parts/single-item-tab-inner.php",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/WenXi/XStreets/wp-content/themes/javo-directory-ed-child/templates/parts/part-single-maps.php",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/WenXi/XStreets/wp-content/themes/javo-directory-ed-child/templates/parts/single-item-one-page.php",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/WenXi/XStreets/wp-content/themes/javo-directory-ed-child/assets/js/MapBoxProtocol.js",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/WenXi/XStreets/wp-content/themes/javo-directory 2/templates/tp-javo-map-tab.php",
+		"/Users/edwardmiller/Desktop/fear.txt",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/WenXi/XStreets/wp-content/themes/javo-directory-ed-child/templates/tp-javo-map-wide.php",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/Kurt/wordpress-importer 2/parsers.php",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/Kurt/wordpress-importer 2/wordpress-importer.php",
+		"/Applications/MAMP/htdocs/wordpress/wp-content/themes/twentyfifteen/autoimport/autoimporter.php",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/WenXi/XStreets/wp-content/themes/javo-directory-ed-child/style.css",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/WenXi/XStreets/wp-content/themes/javo-directory 2/library/dashboard/functions.php",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/WenXi/XStreets/wp-content/themes/javo-directory 2/templates/tp-javo-map-box.php",
+		"/Users/edwardmiller/Documents/Ed's Hobbies/Coding/WenXi/XStreets/wp-content/themes/javo-directory 2/functions.php"
+	],
+	"find":
+	{
+		"height": 22.0
+	},
+	"find_in_files":
+	{
+		"height": 93.0,
+		"where_history":
+		[
+			"<open files>,/Users/edwardmiller/Documents/Ed's Hobbies/Website/sewerbird.github.io/jekyll-bootstrap/blog/Kyahida/_posts,/Users/edwardmiller/Documents/Ed's Hobbies/Website/sewerbird.github.io/jekyll-bootstrap/blog/Nendsame RPG/_posts"
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"systemmajor_id",
+			"click",
+			"console.log",
+			"\\n\\+",
+			"();\n",
+			"{!$Component.SchoolDBSearchWidget}",
+			"validSearc",
+			"\\n-",
+			"console.log",
+			"system_major_school_major",
+			"\\}\\n\\{",
+			"}\\n{",
+			"\\n",
+			"\\t",
+			"\\ ",
+			" ",
+			"\\n",
+			"help",
+			"\\ \\t",
+			"\\n\\t\\{\"",
+			" \\t",
+			"Silurian",
+			"madxy",
+			"II-R",
+			"PARACHUTE",
+			"ui_fsm",
+			"{ui_fsm: ui_fsm}",
+			"Initializing",
+			"interactive",
+			"BubbleBox",
+			"event, s_state, e_state",
+			",\"STATE\"",
+			"payload",
+			"sls",
+			"ui_fsm.current)",
+			"debuglog",
+			"hide = function\\(payload\\)\\{\\n\\n",
+			"show = function\\(payload\\)\\{\\n\\n",
+			"bunny",
+			"pan",
+			"close",
+			"iw_",
+			"infowindow",
+			"closeInfoWOrld",
+			"openInfo",
+			"infoWindo",
+			"setInfoBubble",
+			"close_ib_box",
+			"BMap.Point",
+			"infowindo",
+			"openInfoWindow",
+			"infoWindo",
+			"infobubble",
+			"setMarkers",
+			"marker_on_list",
+			"marker_trigger",
+			"new BMap.size",
+			"setMarkers",
+			"layout",
+			".png",
+			"setDistance",
+			"icon",
+			"this.map.map",
+			"this.map.mapTypes",
+			"swapTo//",
+			"swapTo/",
+			"swapTo",
+			"Baidu",
+			"googlemapstoggle",
+			"Google",
+			"GoogleMaps",
+			"MapsToggle",
+			"img src",
+			"JAVO_",
+			"BaiduMapsToggle",
+			"javo-single-map-area",
+			"c.data.post",
+			"ajaxurl",
+			"infobubble",
+			"str.replace",
+			"javo-single-map-area",
+			"javo-single-item-tab-map-area'",
+			"center",
+			"layout",
+			"InfoBubble",
+			"$.",
+			"$(",
+			"latlng",
+			"init",
+			"javo_msg",
+			"$.",
+			".javo_msg",
+			"$.",
+			"$(",
+			"gmap3",
+			"javo_stm",
+			".latLng",
+			"latLng",
+			"latlng",
+			"$(",
+			"map",
+			"item-location",
+			"javo-single-tab",
+			"single-map-area",
+			"allow_fetch_attachments",
+			"import_options",
+			"handle_upload",
+			"Failed to import",
+			"Media",
+			"media",
+			"map-area",
+			"latlng",
+			"$latlng",
+			"javo_mhome_map_area",
+			".javo_mhome_map_area",
+			"setDistanceBar",
+			"\\n\\n\\n",
+			"single-map",
+			"infoWindo",
+			"infoWindow",
+			"map_clear",
+			"BaiduMapBoxProvider\\.prototype\\.([a-zA-Z_]+) = function\\(([ a-zA-Z_]*)\\)\\n\\{\\n\\tconsole\\.warn\\('DEV-ABLED'\\)\\n\\treturn",
+			"BaiduMapBoxProvider\\.prototype\\.([a-zA-Z_]+) = function\\(([ a-zA-Z_]+)\\)\\n\\{\\n\\tconsole\\.warn\\('DEV-ABLED'\\)\\n\\treturn",
+			"setMarkers",
+			"filter",
+			"setMarkers",
+			"noui",
+			"setDistanceBar"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": true,
+		"replace_history":
+		[
+			"\\n",
+			"testid",
+			"\\n",
+			"schoolmajor_systemmajor__systemmajor_schoolmajor",
+			"},\\n{",
+			"\"}\\n",
+			" , \"name\":\"",
+			"\\n{\"population\":",
+			", \"gloss\" : ",
+			"\\n\\t{ \"pinyin\" : \"",
+			", \"gloss\" : ",
+			"this",
+			"Playing",
+			"Menu",
+			"Configuring",
+			"Landing",
+			"evt, from, to",
+			",\"STATE. (\",payload,\")\"",
+			"event, s_state, e_state, payload",
+			"doc",
+			"ui_fsm.current,\"STATE\")",
+			"console.log",
+			"hide = function(payload)\\n{\\n\\tdebuglog(\"HIDING\",ui_fsm.current)\\n",
+			"show = function(payload)\\n{\\n\\tdebuglog(\"HIDING\",ui_fsm.current)\\n",
+			"show = function(payload)\\n{\\n\\tdebuglog(\"SHOWING\",ui_fsm.current)\\n",
+			"eddo",
+			"jQuery(",
+			"jQuery.",
+			"jQuery(",
+			"jQuery",
+			"javo-single-map-area",
+			".javo-single-map-area",
+			"",
+			"BaiduMapBoxProvider.prototype.$1 = function($2)\\n{\\n\\tconsole.warn('DEV-ABLED','$1')\\n\\treturn",
+			"BaiduMapBoxProvider.prototype.$1 = function($2)\\n{\\n\\tconsole.warn('DEV-ABLED',$1)\\n\\treturn",
+			"BaiduMapBoxProvider",
+			"jQuery$1",
+			"\\$$1",
+			"$$1",
+			"jQuery",
+			"obj.provider.",
+			"obj.provider.el.",
+			"obj.provider.el",
+			"\\nGoogleMapBoxProvider.prototype.$1 = function($2)",
+			"\\nGoogleMapBoxProvider.$1 = function($2)",
+			"MapBoxProtocol.prototype.$1 = function($2)\\n{\\n\\tif(this.provider && this.provider.$1)\\n\\t\\treturn this.provider.$1($2)\\n\\treturn \"WhizzleWhazzle\"\\n}",
+			"MapBoxProtocol.prototype.$1 = function(){\\n\\tif(this.provider && this.provider.$1)\\n\\t\\treturn this.provider.$1()\\n\\treturn \"WhizzleWazzle\"\\n}",
+			"MapBoxProtocol.prototype.$1 = function(){\\n\\tif(this.provider && this.provider.$1)\\n\\t\\treturn this.provider.$1\\n\\treturn \"WhizzleWazzle\"\\n}",
+			"MapBoxProtocol.prototype.$1 = function(){\\n\\tif(this.provider && this.provider.$1)\\n\\t\\treturn this.provider.$1\\n\\treturn\\n}",
+			"MapBoxProtocol.prototype.$1 = function(){\\n\\tif(this.provider && this.provider.$1)\\n\\t\\treturn this.provider.$1\\n\\treturn",
+			"MapBoxProtocol.prototype.$1 = function(){}",
+			"###$1",
+			"$1",
+			"pixGrid",
+			"pixgrid.get($1,$2)",
+			"pixgrid.get(($1),($2))",
+			"pixgrid.get($(1),$(2))",
+			"pixgrid.get($1,$2)",
+			"MAX_EXPLOSIONS_SEEN",
+			"analysis",
+			"kind",
+			"display",
+			"1px black; font-weight: bold;",
+			"0.4px",
+			"exports.$1 = $1\\n",
+			"export.$1 = $1\\n",
+			"export.$1",
+			"recentCNT",
+			"layout: post",
+			"range",
+			"mean",
+			"",
+			"\\n",
+			"\\n//",
+			"\\n\\t//TODO",
+			"//TODO\\n\\tcb\\(undefined,\"okay\"\\)",
+			"Command;",
+			"Command(",
+			"cmd",
+			"DataActionInfo",
+			"=\\nfunction ",
+			"=\\nfunction",
+			"\\n = function",
+			"\\nexports. = function ",
+			"\\n= exports. = function ",
+			"\\n= exports. =",
+			"\\nexports.",
+			"GF",
+			"\\nGameFuncs.",
+			"DA",
+			"*\\t",
+			"",
+			"estimatePriceOf",
+			"this"
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 0,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "README.md",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1399,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								951,
+								951
+							]
+						],
+						"settings":
+						{
+							"auto_name": "# The Kyahidan Culture Project",
+							"syntax": "Packages/Markdown/Markdown.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 22.0
+	},
+	"input":
+	{
+		"height": 30.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.MavensMate-OutputPanel":
+	{
+		"height": 276.0
+	},
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"pinned_build_system": "",
+	"project": "KCP.sublime-project",
+	"replace":
+	{
+		"height": 40.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 500.0,
+		"last_filter": "",
+		"selected_items":
+		[
+			[
+				"",
+				"~/Documents/Ed's Hobbies/Coding/EIC/vagrant/EIC.sublime-workspace"
+			]
+		],
+		"width": 380.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": true,
+	"show_open_files": true,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 250.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}
