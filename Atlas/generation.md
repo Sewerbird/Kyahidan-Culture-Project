@@ -10,7 +10,7 @@ Assuming we desire roughly 1000 samples of the northern hemisphere to lie within
 
 The algorithm for determining the point-cloud associated with Kyahida follows thus:
 
-<script>
+```javascript
   var kyahidan_coords = [];
   var kyahida_lat_1 = Math.PI / 3;
   var kyahida_lat_2 = Math.PI / 6;
@@ -25,7 +25,5 @@ The algorithm for determining the point-cloud associated with Kyahida follows th
       kyahidan_coords.push({lat: lat, lng: lng})
     }
   }
-</script>
-
-
+```
 
