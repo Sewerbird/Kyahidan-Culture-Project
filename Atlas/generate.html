@@ -1,0 +1,131 @@
+<html>
+  <head>
+  </head>
+  <body>
+  <canvas id="equi_map" width=400px height=400px></canvas>
+  <canvas id="orth_map" width=400px height=400px></canvas>
+  <div id="sample_count">
+  </div>
+  <script>
+  var coords = [];
+  var kyahida_lat_1 = Math.PI / 3;
+  var kyahida_lat_2 = Math.PI / 6;
+  var kyahida_lng_2 = Math.PI / 3;
+  center = {lat: Math.PI/2 + Math.PI/6, lng: 0}
+
+  for(var i = 0; i < 10000; i ++)
+  {
+    var lng = 2 * Math.PI * Math.random() - Math.PI;
+    var lat = Math.asin(2 * Math.random() - 1);
+    var clr = '#'+Math.floor(Math.random()*16777215).toString(16);
+    if(lat > kyahida_lat_1 || (lat > kyahida_lat_2 && Math.abs(lng) < kyahida_lng_2/2))
+    {
+      coords.push({lat: lat, lng: lng, clr: clr})
+    }
+  }
+
+  function redraw(){
+    center.lng -= Math.PI/10
+    center.lng %= 2 * Math.PI
+    draw();
+  }
+  draw();
+  setInterval(redraw,10)
+  //DRAW CODE
+  function draw(){
+    var ctx;
+    //Coord count
+    console.log("Kyahidan regions (", coords.length,"):",coords);
+    document.getElementById("sample_count").innerText="Coords: "+coords.length
+    ctx = document.getElementById("equi_map").getContext("2d")
+    ctx.fillStyle="#FFFFFF"
+    ctx.fillRect(0,0,400,200)
+    //Equirectangular Map
+    //outline
+    ctx.rect(0,0,400,200)
+    ctx.stroke();
+    //samples
+    for(var i = 0; i < coords.length; i++)
+    {
+      var lng = center.lng + coords[i].lng;
+      if(lng > Math.PI) lng -= Math.PI * 2
+      if(lng < -Math.PI) lng += Math.PI * 2
+      var p_x = 400 * lng / (2 * Math.PI) + 200;
+      var p_y = -(100 * (coords[i].lat) / (Math.PI / 2)) + 100;
+      ctx.fillStyle=coords[i].clr;
+      ctx.fillRect(p_x, p_y, 1, 1);
+    }
+    //equator
+    ctx.rect(0,100,400,1)
+    ctx.stroke();
+
+    //Orthographic Polar Map
+    ctx = document.getElementById("orth_map").getContext("2d")
+    //outline
+    ctx.rect(0,0,400,400)
+    ctx.stroke();
+    //horizon
+    ctx.beginPath();
+    ctx.arc(200,200,200,0,2 * Math.PI)
+    ctx.stroke();
+    //ground
+    ctx.fillStyle="#8888DD"
+    var lngMax = 0;
+    var lngMin = 0;
+    for(var x = 0; x < 400; x++)
+    {
+      for(var y = 0; y < 400; y++)
+      {
+        if((x-200) * (x-200) + (y-200) * (y-200) > 200 * 200) continue;
+        var coord = pxToLatLng_Orthographic(x-200,y-200,200,center)
+        if(coord.lng)//lies on the sphere
+        {
+          if(coord.lat > kyahida_lat_1 || (coord.lat > kyahida_lat_2 && Math.abs(coord.lng) < kyahida_lng_2/2))
+          {
+            //ctx.fillStyle="rgb(100,"+Math.floor(125*(coord.lng/(Math.PI*2))+100)+",100)"
+            ctx.fillStyle="#FFFFFF"
+          }
+          else
+          {
+            ctx.fillStyle="rgb("+0+","+0+","+Math.floor(125*(coord.lat/(Math.PI/2)) + 125)+")";
+          }
+          ctx.fillRect(x,y,1,1)
+        }
+      }
+    }
+    //samples
+    for(var i = 0; i < coords.length; i++)
+    {
+      var lat = coords[i].lat;
+      var lng = coords[i].lng;
+      var px = latLngToPx_Orthographic(lat,lng,200,center);
+
+      ctx.fillStyle=coords[i].clr;
+      ctx.fillRect(px.x, px.y, 2, 2)
+    }
+  }
+  function latLngToPx_Orthographic(lat, lng, radius, center)
+  {
+    var p_x = (radius * Math.cos(lat) * Math.sin(lng - center.lng)) + radius;
+    var p_y = (radius * (Math.cos(center.lat) * Math.sin(lat) - Math.sin(center.lat) * Math.cos(lat) * Math.cos(lng - center.lng))) + radius;
+    return {
+      x : p_x,
+      y : p_y
+    }
+  }
+  function pxToLatLng_Orthographic(x,y, radius, center)
+  {
+    var p = Math.sqrt(Math.pow(x,2) + Math.pow(y,2));
+    var c = Math.asin(p/radius)
+    var lng = center.lng + Math.atan2(x * Math.sin(c),(p*Math.cos(c)*Math.cos(center.lat)) - (y * Math.sin(c) * Math.sin(center.lat)))
+    var lat = Math.asin(Math.cos(c) * Math.sin(center.lat) + ((y * Math.sin(c) * Math.cos(center.lat)) / p))
+    if(lng > Math.PI) lng -= Math.PI * 2
+    if(lng < -Math.PI) lng += Math.PI * 2
+    return {
+      lat: lat,
+      lng: lng //conversion from -PI<->PI to 0<->2PI coordinate system
+    }
+  }
+  </script>
+  </body>
+</html>
