@@ -11,13 +11,16 @@
   var kyahida_lat_1 = Math.PI / 3;
   var kyahida_lat_2 = Math.PI / 6;
   var kyahida_lng_2 = Math.PI / 3;
-  center = {lat: Math.PI/2 + Math.PI/6, lng: 0}
+  center = {lat: 0/* Math.PI/2*/, lng: 0/* Math.PI*/}
+  equi_cam = {width:400, height: 200, radius: 200, offsetX: 0, offsetY: 0}
+  orth_cam = {width:400, height: 400, radius: 200, offsetX: 0, offsetY: 0}
 
-  for(var i = 0; i < 10000; i ++)
+  for(var i = 0; i < 1000; i ++)
   {
     var lng = 2 * Math.PI * Math.random() - Math.PI;
     var lat = Math.asin(2 * Math.random() - 1);
     var clr = '#'+Math.floor(Math.random()*16777215).toString(16);
+    while(clr.length < 7) clr += "0"
     if(lat > kyahida_lat_1 || (lat > kyahida_lat_2 && Math.abs(lng) < kyahida_lng_2/2))
     {
       coords.push({lat: lat, lng: lng, clr: clr})
@@ -30,7 +33,7 @@
     draw();
   }
   draw();
-  setInterval(redraw,10)
+  //setInterval(redraw,10)
   //DRAW CODE
   function draw(){
     var ctx;
@@ -40,9 +43,11 @@
     ctx = document.getElementById("equi_map").getContext("2d")
     ctx.fillStyle="#FFFFFF"
     ctx.fillRect(0,0,400,200)
-    //Equirectangular Map
+    /*
+     *  Equirectangular Map
+     */
     //outline
-    ctx.rect(0,0,400,200)
+    ctx.rect(0,0,equi_cam.width,equi_cam.height)
     ctx.stroke();
     //samples
     for(var i = 0; i < coords.length; i++)
@@ -50,40 +55,39 @@
       var lng = center.lng + coords[i].lng;
       if(lng > Math.PI) lng -= Math.PI * 2
       if(lng < -Math.PI) lng += Math.PI * 2
-      var p_x = 400 * lng / (2 * Math.PI) + 200;
-      var p_y = -(100 * (coords[i].lat) / (Math.PI / 2)) + 100;
+      var p_x = equi_cam.width * lng / (2 * Math.PI) + equi_cam.width / 2;
+      var p_y = -(equi_cam.height / 2 * (coords[i].lat) / (Math.PI / 2)) + equi_cam.height/2;
       ctx.fillStyle=coords[i].clr;
       ctx.fillRect(p_x, p_y, 1, 1);
     }
     //equator
-    ctx.rect(0,100,400,1)
+    ctx.rect(0,equi_cam.height/2,equi_cam.width,1)
     ctx.stroke();
 
-    //Orthographic Polar Map
+    /*
+     *  Orthographic Polar Map
+     */
     ctx = document.getElementById("orth_map").getContext("2d")
     //outline
-    ctx.rect(0,0,400,400)
-    ctx.stroke();
-    //horizon
-    ctx.beginPath();
-    ctx.arc(200,200,200,0,2 * Math.PI)
+    ctx.rect(0,0,orth_cam.width,orth_cam.height)
     ctx.stroke();
     //ground
     ctx.fillStyle="#8888DD"
     var lngMax = 0;
     var lngMin = 0;
-    for(var x = 0; x < 400; x++)
+    for(var x = 0; x < orth_cam.width; x++)
     {
-      for(var y = 0; y < 400; y++)
+      for(var y = 0; y < orth_cam.height; y++)
       {
-        if((x-200) * (x-200) + (y-200) * (y-200) > 200 * 200) continue;
-        var coord = pxToLatLng_Orthographic(x-200,y-200,200,center)
+        if(Math.pow(x-orth_cam.width/2,2) + Math.pow(y-orth_cam.height,2) > Math.pow(orth_cam.width,2)) continue;
+        var coord = pxToLatLng_Orthographic(x-orth_cam.width/2,y-orth_cam.height/2,orth_cam.radius,center)
         if(coord.lng)//lies on the sphere
         {
-          if(coord.lat > kyahida_lat_1 || (coord.lat > kyahida_lat_2 && Math.abs(coord.lng) < kyahida_lng_2/2))
+          if(true || coord.lat > kyahida_lat_1 || (coord.lat > kyahida_lat_2 && Math.abs(coord.lng) < kyahida_lng_2/2))
           {
             //ctx.fillStyle="rgb(100,"+Math.floor(125*(coord.lng/(Math.PI*2))+100)+",100)"
             ctx.fillStyle="#FFFFFF"
+            ctx.fillStyle=getClosestLocale(coords, coord.lat, coord.lng, orth_cam.radius).clr
           }
           else
           {
@@ -98,16 +102,20 @@
     {
       var lat = coords[i].lat;
       var lng = coords[i].lng;
-      var px = latLngToPx_Orthographic(lat,lng,200,center);
+      var px = latLngToPx_Orthographic(lat,lng,orth_cam.radius,center);
 
       ctx.fillStyle=coords[i].clr;
-      ctx.fillRect(px.x, px.y, 2, 2)
+      ctx.fillRect(px.x, px.y, 4, 4)
+      console.log(coords[i].clr)
+      //ctx.rect(px.x, px.y, 4, 4)
+      //ctx.fillStyle="#000000"
+      //ctx.stroke();
     }
   }
   function latLngToPx_Orthographic(lat, lng, radius, center)
   {
-    var p_x = (radius * Math.cos(lat) * Math.sin(lng - center.lng)) + radius;
-    var p_y = (radius * (Math.cos(center.lat) * Math.sin(lat) - Math.sin(center.lat) * Math.cos(lat) * Math.cos(lng - center.lng))) + radius;
+    var p_x = (radius * Math.cos(lat) * Math.sin(lng - center.lng)) + orth_cam.width/2 + orth_cam.offsetX;
+    var p_y = (radius * (Math.cos(center.lat) * Math.sin(lat) - Math.sin(center.lat) * Math.cos(lat) * Math.cos(lng - center.lng))) + orth_cam.height/2 + orth_cam.offsetY;
     return {
       x : p_x,
       y : p_y
@@ -125,6 +133,36 @@
       lat: lat,
       lng: lng //conversion from -PI<->PI to 0<->2PI coordinate system
     }
+  }
+  function sphericalDistance(lat1,lng1,lat2,lng2,radius)
+  {
+    //var absLng = Math.min(lng2 - lng1, 2 * Math.PI - (lng2 - lng1))
+    //return radius * Math.acos(Math.sin(lat1) * Math.sin(lat2) + Math.cos(lng1) * Math.cos(lng2) * absLng)
+    var dX = Math.cos(lat2) * Math.cos(lng2) - Math.cos(lat1) * Math.cos(lng1)
+    var dY = Math.cos(lat2) * Math.sin(lng2) - Math.cos(lat1) * Math.sin(lng1)
+    var dZ = Math.sin(lat2) - Math.sin(lat1)
+
+    var C = Math.sqrt(Math.pow(dX,2) + Math.pow(dY,2) + Math.pow(dZ,2))
+
+    var dT = 2 * Math.asin(C/2)
+
+    return dT * radius;
+  }
+  function getClosestLocale(locales, lat, lng, radius)
+  {
+    var distance = Number.POSITIVE_INFINITY;
+    var closest = {};
+    for(var i = 0; i < locales.length; i ++)
+    {
+      var d = sphericalDistance(lat,lng,locales[i].lat,locales[i].lng,radius);
+      if(d <= distance)
+      {
+        distance = d;
+        closest = locales[i];
+      }
+    }
+    closest.distance = distance;
+    return closest;
   }
   </script>
   </body>
