@@ -2,8 +2,9 @@
   <head>
   </head>
   <body>
-  <canvas id="equi_map" width=400px height=400px></canvas>
+  <canvas id="equi_map" width=800px height=400px></canvas>
   <canvas id="orth_map" width=400px height=400px></canvas>
+  <canvas id="squiggle" width =800px height=100px></canvas>
   <div id="sample_count">
   </div>
   <script>
@@ -11,11 +12,11 @@
   var kyahida_lat_1 = Math.PI / 3;
   var kyahida_lat_2 = Math.PI / 6;
   var kyahida_lng_2 = Math.PI / 3;
-  center = {lat: 0/* Math.PI/2*/, lng: 0/* Math.PI*/}
-  equi_cam = {width:400, height: 200, radius: 200, offsetX: 0, offsetY: 0}
+  center = {lat:  Math.PI/2, lng:  0}
+  equi_cam = {width:800, height: 400, radius: 200, offsetX: 0, offsetY: 0}
   orth_cam = {width:400, height: 400, radius: 200, offsetX: 0, offsetY: 0}
 
-  for(var i = 0; i < 1000; i ++)
+  for(var i = 0; i < 4000; i ++)
   {
     var lng = 2 * Math.PI * Math.random() - Math.PI;
     var lat = Math.asin(2 * Math.random() - 1);
@@ -28,12 +29,11 @@
   }
 
   function redraw(){
-    center.lng -= Math.PI/10
+    center.lng -= Math.PI/4
     center.lng %= 2 * Math.PI
     draw();
   }
-  draw();
-  //setInterval(redraw,10)
+  setInterval(redraw,2000)
   //DRAW CODE
   function draw(){
     var ctx;
@@ -60,6 +60,33 @@
       ctx.fillStyle=coords[i].clr;
       ctx.fillRect(p_x, p_y, 1, 1);
     }
+    //voronoi
+    /*
+    ctx.fillStyle="#8888DD"
+    var lngMax = 0;
+    var lngMin = 0;
+    for(var x = 0; x < equi_cam.width; x++)
+    {
+      for(var y = 0; y < equi_cam.height; y++)
+      {
+        var coord = {lng: x/equi_cam.width * Math.PI * 2 - Math.PI,lat:y/equi_cam.height*Math.PI - Math.PI/2}
+        if(coord.lng)//lies on the sphere
+        {
+          if(coord.lat > kyahida_lat_1 || (coord.lat > kyahida_lat_2 && Math.abs(coord.lng) < kyahida_lng_2/2))
+          {
+            ctx.fillStyle="rgb(100,"+Math.floor(125*(coord.lng/(Math.PI*2))+100)+",100)"
+            ctx.fillStyle="#FFFFFF"
+            ctx.fillStyle=getClosestLocale(coords, coord.lat, coord.lng, orth_cam.radius).clr
+          }
+          else
+          {
+            ctx.fillStyle="rgb("+0+","+0+","+Math.floor(125*(coord.lat/(Math.PI/2)) + 125)+")";
+          }
+          ctx.fillRect(x,y,1,1)
+        }
+      }
+    }
+    */
     //equator
     ctx.rect(0,equi_cam.height/2,equi_cam.width,1)
     ctx.stroke();
@@ -79,15 +106,21 @@
     {
       for(var y = 0; y < orth_cam.height; y++)
       {
+        //if not on globe, skip
         if(Math.pow(x-orth_cam.width/2,2) + Math.pow(y-orth_cam.height,2) > Math.pow(orth_cam.width,2)) continue;
+
         var coord = pxToLatLng_Orthographic(x-orth_cam.width/2,y-orth_cam.height/2,orth_cam.radius,center)
         if(coord.lng)//lies on the sphere
         {
-          if(true || coord.lat > kyahida_lat_1 || (coord.lat > kyahida_lat_2 && Math.abs(coord.lng) < kyahida_lng_2/2))
+          var f_polar = sphericalDistance(Math.PI/2,0,coord.lat, coord.lng,orth_cam.radius)
+          var f_tropic = sphericalDistance(Math.PI/3,0,coord.lat,coord.lng,orth_cam.radius)
+
+          //if(coord.lat > kyahida_lat_1 || (coord.lat > kyahida_lat_2 && Math.abs(coord.lng) < kyahida_lng_2/2))
+          if(Math.pow(f_tropic,2)/20000 + Math.pow(f_polar,2)/40000 < 1)
           {
-            //ctx.fillStyle="rgb(100,"+Math.floor(125*(coord.lng/(Math.PI*2))+100)+",100)"
+            ctx.fillStyle="rgb(100,"+Math.floor(125*(coord.lng/(Math.PI*2))+100)+",100)"
             ctx.fillStyle="#FFFFFF"
-            ctx.fillStyle=getClosestLocale(coords, coord.lat, coord.lng, orth_cam.radius).clr
+            //ctx.fillStyle=getClosestLocale(coords, coord.lat, coord.lng, orth_cam.radius).clr
           }
           else
           {
@@ -96,20 +129,6 @@
           ctx.fillRect(x,y,1,1)
         }
       }
-    }
-    //samples
-    for(var i = 0; i < coords.length; i++)
-    {
-      var lat = coords[i].lat;
-      var lng = coords[i].lng;
-      var px = latLngToPx_Orthographic(lat,lng,orth_cam.radius,center);
-
-      ctx.fillStyle=coords[i].clr;
-      ctx.fillRect(px.x, px.y, 4, 4)
-      console.log(coords[i].clr)
-      //ctx.rect(px.x, px.y, 4, 4)
-      //ctx.fillStyle="#000000"
-      //ctx.stroke();
     }
   }
   function latLngToPx_Orthographic(lat, lng, radius, center)

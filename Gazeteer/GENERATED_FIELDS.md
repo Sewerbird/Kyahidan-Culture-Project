@@ -13,7 +13,7 @@ Preassignment values are able to be created without a precise knowledge of where
 - Population : Total average human population
 - Population Rank : World population ranking
 - Altitude : Height above sea level, on average, that the location has
-- Climate Type : Koppen Classification
+- Potential Evapotranspiration : Helps restrict climate zones the city can be assigned to
 - Location Type : General topology of the land (coastal, valley, isthmus, mountain, etc)
 
 ## Postassignment Values

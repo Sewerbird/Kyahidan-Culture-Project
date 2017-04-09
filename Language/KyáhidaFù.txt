@@ -1,0 +1,10 @@
+Kyáhida
+
+Let's make some words.
+
+fù - something [n]; to do something [v]; some [det]; "Something something'd some something" -> "fù fù fù fù""
+wī - and (clause level)[conj]; "Something something'd and something something'd" -> "fù fù wī fù fù"
+wü - or (clause level)[conj]; "Something something'd and something something'd" -> "fù fù wü fù fù"
+yā - and (phrase level)[conj]; "Something and something something'd" -> "fù yā fù fù"
+yé - and (phrase level)[conj]; "Something and something something'd" -> "fù yé fù fù"
+kà - not [adv]; "Something didn't something" -> "fù kà fù fù"

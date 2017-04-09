@@ -1,0 +1,15 @@
+{
+  "name": "gazeteer",
+  "version": "1.0.0",
+  "description": "The Gazeteer will work in close cooperation with the Atlas, but focus on providing demographic, climatological, and positional information about all the settlements of Kyahida, as well as a section for natural wonders and world records (tallest 10 peaks, etc).",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "gifencoder": "^1.0.6",
+    "simplex-noise": "^2.2.0"
+  }
+}

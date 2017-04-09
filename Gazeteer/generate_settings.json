@@ -1,0 +1,7 @@
+{
+  "num_locales" : 100,
+  "largest_locale_population" : 100000,
+  "zipf_population_variability" : 0.05,
+  "everest_altitude" : 6000,
+  "planetary_radius" : 2000
+}
