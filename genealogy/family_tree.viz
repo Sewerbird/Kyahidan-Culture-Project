@@ -1,0 +1,6 @@
+strict digraph G {compound=true;overlap=scale;
+	subgraph cluster_matrilineal {
+	}
+	subgraph cluster_patrilineal {
+	}
+}
