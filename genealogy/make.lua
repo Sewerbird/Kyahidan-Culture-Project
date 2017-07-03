@@ -203,6 +203,11 @@ for year = 1, years_to_simulate do
 		table.insert(people[x.father].children, x.id)
 	end)
 
+	--Cleanup working set: dead people lie in peace
+	working_set = _.filter(working_set, function(id)
+		return people[id].alive
+	end)
+
 	print("Year " .. year)
 end
 
