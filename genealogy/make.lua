@@ -7,7 +7,7 @@ local _ = require 'shimmed'
 local years_to_simulate = 500
 local summary_period = 1
 local male_female_population_ratio = 0.47 / 0.53
-local seed_cohort_population = 1000
+local people_population = 1000
 local infant_yearly_death_chance = 0.07 -- 0-2
 local child_yearly_death_chance = 0.03 -- 3-9
 local pubescent_yearly_death_chance = 0.05 -- 10-14
@@ -86,9 +86,12 @@ end
 
 --Seed
 math.randomseed(os.time())
-local seed_cohort = {}
-for i = 1, seed_cohort_population do
-	table.insert(seed_cohort, random_person(i,i))
+local people = {}
+local working_set = {}
+for i = 1, people_population do
+	local friend = random_person(i,i)
+	table.insert(working_set, i)
+	table.insert(people, friend)
 end
 
 --Simulate
@@ -97,7 +100,8 @@ for year = 1, years_to_simulate do
 	--Do Aging
 	local deaths = 0
 	local survivals = 0
-	seed_cohort = _.map(seed_cohort, function (x)
+	_.each(working_set, function (id)
+		x = people[id]
 		if not x.alive then return x end
 		local age = x.age
 		if (age >= infanthood_age and age < childhood_age and math.random() < infant_yearly_death_chance)
@@ -105,27 +109,17 @@ for year = 1, years_to_simulate do
 		or (age >= pubescent_age and age < adulthood_age and math.random() < pubescent_yearly_death_chance)
 		or (age >= adulthood_age and age < elder_age and math.random() < adult_yearly_death_chance)
 		or (age >= elder_age and math.random() < elder_yearly_death_chance) then
-			x.alive = false
-			x.deathyear = year
-			if seed_cohort[x.mother] and seed_cohort[x.mother].alive then
-				seed_cohort[x.mother].dead_children = seed_cohort[x.mother].dead_children + 1
-			end
-			if seed_cohort[x.father] and seed_cohort[x.father].alive  then
-				seed_cohort[x.father].dead_children = seed_cohort[x.father].dead_children + 1
-			end
-			deaths = deaths + 1
+			people[id].alive = false
+			people[id].deathyear = year
 		else
-			x.age = x.age + 1
-			survivals = survivals +1
+			people[id].age = people[id].age + 1
 		end
-		return x
 	end)
-
-
 
 	--Do Marriage
 	local marriages = 0
-	local brides = _.filter(seed_cohort, function(x) 
+	local brides = _.filter(working_set, function(id)
+				local x = people[id] 
 				return x.alive 
 				and not x.married
 				and x.age >= adulthood_age and x.age < elder_age 
@@ -133,7 +127,8 @@ for year = 1, years_to_simulate do
 				and x.age < spinster_age
 				and math.random() < marriage_market_eligibility_chance 
 			end)
-	local grooms = _.filter(seed_cohort, function(x) 
+	local grooms = _.filter(working_set, function(id)
+				local x = people[id] 
 				return x.alive 
 				and not x.married
 				and x.age >= adulthood_age and x.age < elder_age 
@@ -142,144 +137,113 @@ for year = 1, years_to_simulate do
 			end)
 	local new_marriages = {}
 	if #brides > 0 and #grooms > 0 then
-		table.sort(brides, function(a,b) return a.genetic < b.genetic end)
-		table.sort(grooms, function(a,b) return a.genetic < b.genetic end)
+		table.sort(brides, function(a,b) return people[a].genetic < people[b].genetic end)
+		table.sort(grooms, function(a,b) return people[a].genetic < people[b].genetic end)
 		for i = 1, #brides do
 			if grooms[i] then
 				-- incest taboo
-				bridemother = brides[i].mother
-				bridefather = brides[i].father
-				groommother = grooms[i].mother
-				groomfather = grooms[i].father
+				bridemother = people[brides[i]].mother
+				bridefather = people[brides[i]].father
+				groommother = people[grooms[i]].mother
+				groomfather = people[grooms[i]].father
 				if not(
 					(bridemother and groommother and (bridemother == groommother)) or
 					(bridefather and groomfather and (bridefather == groomfather))) then
-
-					new_marriages[brides[i].id] = grooms[i].id
-					new_marriages[grooms[i].id] = brides[i].id
+					new_marriages[brides[i]] = grooms[i]
+					new_marriages[grooms[i]] = brides[i]
 					marriages = marriages + 1
-				else
-					print("Siblings were paired, but denied to marry each other, obviously")
 				end
 			end
 		end
 	end
-	seed_cohort = _.map(seed_cohort, function(x) 
-		if new_marriages[x.id] then
-			x.married = true
-			x.spouse = new_marriages[x.id]
+	_.each(working_set, function(id) 
+		local x = people[id]
+		if new_marriages[id] then
+			people[id].married = true
+			people[id].spouse = new_marriages[id]
 			if groom_joins_bride_household and x.gender == "M" then 
-				x.household = seed_cohort[new_marriages[x.id]].household
+				people[id].household = people[new_marriages[id]].household
 			elseif bride_joins_groom_household and x.gender == "F" then
-				x.household = seed_cohort[new_marriages[x.id]].household
+				people[id].household = people[new_marriages[id]].household
 			end
 		end
-		return x
 	end)
 
 	-- Handle Birth & Pregnancy
 	local births = 0
 	local pregnancies = 0
 	local new_babies = {}
-	seed_cohort = _.map(seed_cohort, function(x)
+	_.each(working_set, function(id)
+		local x = people[id]
 		if x.alive 
 		and x.gender == "F" 
 		and x.pregnant then
-			local baby = baby_person(x,seed_cohort[x.spouse])
-			baby.id = #seed_cohort+1
-			table.insert(seed_cohort, baby)
-			table.insert(seed_cohort[baby.mother].children, baby.id)
-			table.insert(seed_cohort[baby.father].children, baby.id)
-			--table.insert(new_babies, baby)
-			x.pregnant = false
+			--Finished pregnancy
+			local baby = baby_person(x,people[x.spouse])
+			table.insert(new_babies, baby)
+			people[id].pregnant = false
 			births = births + 1
 		elseif x.alive 
 		and x.married 
 		and x.gender == "F"
 		and x.age < menopause_age
 		and x.pregnant == false
-		and seed_cohort[x.spouse].alive 
+		and people[x.spouse].alive 
 		and math.random() < married_reproduction_chance then
-			x.pregnant = true
+			--Became pregnant
+			people[id].pregnant = true
 			pregnancies = pregnancies + 1
 		end
-
-		return x
+	end)
+	_.each(new_babies, function(x)
+		x.id = #people+1
+		table.insert(people,x)
+		table.insert(working_set,x.id)
+		table.insert(people[x.mother].children, x.id)
+		table.insert(people[x.father].children, x.id)
 	end)
 
-	-- Yearly Stat Collection
-	if year % summary_period == 0 then 
-		local patronyms = {}
-		local live_stats = _.reduce(seed_cohort, function(acc, x) 
-			acc.total = acc.total+1
-			if x.alive then 
-				acc.alive = acc.alive + 1
-				if x.gender == "M" then
-					acc.male = acc.male + 1
-				else
-					acc.female = acc.female + 1
-				end
-				if x.married then
-					if seed_cohort[x.spouse].alive then
-						acc.married = acc.married + 1
-					else
-						acc.widowed = acc.widowed + 1
-					end
-				elseif x.age >= adulthood_age then
-					acc.unmarried = acc.unmarried + 1
-				elseif x.age < adulthood_age and x.age >= childhood_age then
-					acc.kids = acc.kids + 1
-				elseif x.age < childhood_age then
-					acc.infants = acc.infants + 1
-				end
+	print("Year " .. year)
+end
 
-				acc.alive_genetic = acc.alive_genetic + x.genetic
-				if patronyms[x.patronym] == nil then patronyms[x.patronym] = 1
-				else patronyms[x.patronym] = patronyms[x.patronym] + 1 end
-			else
-				acc.dead = acc.dead+1
-			end
-			return acc
-		end, {total = 0, dead = 0, alive = 0, male = 0, female = 0, married = 0, widowed = 0, unmarried = 0, kids = 0, infants = 0, max_parented = 0, parents = 0, alive_genetic = 0, total_dead_children = 0, parents_with_dead_children = 0, surviving_patronyms = 0})
+--Utility
 
-		local keyset={}
-		local n=0
+function get_ids_by_familial_distance(person_id, distance, genetic_only)
+	if person_id and distance <= 0 then return person_id end
 
-		for k,v in pairs(patronyms) do
-		  n=n+1
-		  keyset[n]=k
-		end
+	local person = people[person_id]
+	local people = {}
+	local relations = {}
 
-		print("YEAR " .. year .. " -- " .. 
-			"total:" .. live_stats.total .. 
-			" alive:" .. live_stats.alive .. 
-			" births:" .. births .. 
-			" deaths:" .. deaths 
-			--" dead:" .. live_stats.dead .. 
-			--" male:" .. live_stats.male .. 
-			--" female:" .. live_stats.female .. 
-			--" married:" .. live_stats.married .. 
-			--" widowed:" .. live_stats.widowed .. 
-			--" unmarried:" .. live_stats.unmarried .. 
-			--" kids:" .. live_stats.kids ..
-			--" infants:" .. live_stats.infants ..
-			--" survivals:" .. survivals .. 
-			--" marriages:" .. marriages .. 
-			--" pregnancies:" .. pregnancies .. 
-			--" max_parented:" .. live_stats.max_parented ..
-			--" parents:" .. live_stats.parents ..
-			--" avg.clutch:" .. (live_stats.children/live_stats.parents) .. 
-			--" avg.genetic:" .. (live_stats.alive_genetic/live_stats.alive) ..
-			--" parents_with_dead_children" .. live_stats.parents_with_dead_children .. 
-			--" avg.dead_children:" .. (live_stats.total_dead_children/live_stats.parents_with_dead_children) ..
-			--" avg.live_children:" .. ((live_stats.children/live_stats.parents) - (live_stats.total_dead_children/live_stats.parents_with_dead_children))
-			)
+	if person.father then
+		table.insert(people, target)
+		table.insert(relations, { src = person_id, dst = person.father, kind = 'father'})
+		table.insert(relations, { src = person.father, dst = person_id, kind = 'child'})
 	end
-	--]]
+	if person.mother then
+		table.insert(people, target)
+		table.insert(relations, { src = person_id, dst = person.mother, kind = 'mother'})
+		table.insert(relations, { src = person.mother, dst = person_id, kind = 'child'})
+	end
+	if person.spouse and not genetic_only then
+		table.insert(people, target)
+		table.insert(relations, { src = person_id, dst = person.spouse, kind = 'spouse'})
+		table.insert(relations, { src = person.spouse, dst = person_id, kind = 'child'})
+	end
+	if person.children and #person.children > 0 then
+		_.each(person.children, function(child) 
+				table.insert(relations, { src = person_id, dst = child, kind = person.gender == "M" and 'father' or 'mother'})
+				table.insert(relations, { src = child, dst = person_id, kind = 'child'})
+			end)
+	end
+	table.insert(result, get_by_familial_distance(person.mother,distance-1))
+	if not genetic_only then table.insert(result, get_by_familial_distance(person.spouse,distance-1)) end
+
+	return _.uniq(_.flatten(people)), relations
 end
 
 --Perform data dump
-local csv_header = "id, name, gender, alive, married, pregnant, fertile, father, mother, children, age, genetic, birthyear, deathyear"
+local csv_header = "id, firstname, lastname, gender, alive, married, pregnant, fertile, father, mother, children, age, genetic, birthyear, deathyear"
 function ngr(x) 
 	if x == nil then 
 		return ""
@@ -296,10 +260,25 @@ function ngr(x)
 	end 
 end
 function person_to_csv(x)
-	return ngr(x.id) .. "," .. ngr(x.givennym) .. "." .. ngr(x.patronym) .. "," .. ngr(x.gender) .. "," ..  ngr(x.alive) .. "," .. ngr(x.married) .. "," ..  ngr(x.pregnant) .. "," ..  ngr(x.fertile) .. "," .. ngr(x.father) .. "," .. ngr(x.mother) .. "," .. ngr(x.children) .. "," ..  ngr(x.age) .. "," .. ngr(x.genetic) .. "," ..  ngr(x.birthyear) .. "," .. ngr(x.deathyear)
+	return ngr(x.id) .. ","
+	 .. ngr(x.givennym) .. ","
+	 .. ngr(x.patronym) .. "," 
+	 .. ngr(x.gender) .. "," 
+	 ..  ngr(x.alive) .. "," 
+	 .. ngr(x.married) .. "," 
+	 ..  ngr(x.pregnant) .. "," 
+	 ..  ngr(x.fertile) .. "," 
+	 .. ngr(x.father) .. "," 
+	 .. ngr(x.mother) .. "," 
+	 .. ngr(x.children) .. "," 
+	 ..  ngr(x.age) .. "," 
+	 .. ngr(x.genetic) .. "," 
+	 ..  ngr(x.birthyear) .. "," 
+	 .. ngr(x.deathyear)
 end
 local f = assert(io.open("geneology.csv", "w"))
-_.each(seed_cohort, function(x) f:write("\n" .. person_to_csv(x)) end)
+f:write(csv_header)
+_.each(people, function(x) f:write("\n" .. person_to_csv(x)) end)
 f.close()
 
 --Draw graphs
@@ -308,16 +287,16 @@ local g
 g = assert(io.open("family_tree.viz", "w"))
 g:write("strict digraph G {compound=true;overlap=scale;")
 g:write("\n\tsubgraph cluster_matrilineal {")
-_.each( seed_cohort, function(x)
+_.each( people, function(x)
 	if x.alive then
 		if x.mother then
-			local fathername = seed_cohort[x.father].givennym .. "." .. seed_cohort[x.father].patronym
-			if not seed_cohort[x.mother].alive then
-				local mothername = seed_cohort[x.mother].givennym .. "." .. seed_cohort[x.mother].patronym
-				g:write("\n\t\t"..x.mother.." [color=gray,shape=circle,label=\""..mothername.."("..seed_cohort[x.mother].age..")\"]")
+			local fathername = people[x.father].givennym .. "." .. people[x.father].patronym
+			if not people[x.mother].alive then
+				local mothername = people[x.mother].givennym .. "." .. people[x.mother].patronym
+				g:write("\n\t\t"..x.mother.." [color=gray,shape=circle,label=\""..mothername.."("..people[x.mother].age..")\"]")
 			end
-			if not seed_cohort[x.father].alive then
-				g:write("\n\t\t"..x.father.." [color=gray,shape=square,label=\""..fathername.."("..seed_cohort[x.father].age..")\"]")
+			if not people[x.father].alive then
+				g:write("\n\t\t"..x.father.." [color=gray,shape=square,label=\""..fathername.."("..people[x.father].age..")\"]")
 				g:write("\n\t\t".. x.father .. "->" .. x.mother .. " [color=red]")
 			end
 			g:write("\n\t\t".. x.mother .. "->" .. x.id .. " [color=blue]")
@@ -330,13 +309,13 @@ _.each( seed_cohort, function(x)
 end)
 g:write("\n\t}")
 g:write("\n\tsubgraph cluster_patrilineal {")
-_.each( seed_cohort, function(x)
+_.each( people, function(x)
 	if x.alive then 
 		if x.married and x.gender == "M" then
 			g:write("\n\t\t".. x.id .. "->" .. x.spouse .. " [color=red]")
-			if not seed_cohort[x.spouse].alive then
-				local spousename = seed_cohort[x.spouse].givennym .. "." .. seed_cohort[x.spouse].patronym
-				g:write("\n\t\t" .. x.spouse .. " [color=gray,shape=circle,label=\""..spousename.."("..seed_cohort[x.spouse].age..")\"]")
+			if not people[x.spouse].alive then
+				local spousename = people[x.spouse].givennym .. "." .. people[x.spouse].patronym
+				g:write("\n\t\t" .. x.spouse .. " [color=gray,shape=circle,label=\""..spousename.."("..people[x.spouse].age..")\"]")
 			end
 		end
 	end
@@ -350,30 +329,30 @@ for i = 1, sample_people do
 	g = assert(io.open("sample_person_"..i..".viz", "w"))
 	g:write("strict digraph G {compound=true; overlap=scale;")
 	g:write("\n\tsubgraph cluster_ancestors {")
-		local sample = _.sample(_.filter(seed_cohort, function(x) return x.alive end))
+		local sample = _.sample(_.filter(people, function(x) return x.alive end))
 		local parent_depth = 6
 		function addParents(x,level)
 			if level > parent_depth then return end
 			if x.mother then
-				local mothername = seed_cohort[x.mother].givennym .. "." .. seed_cohort[x.mother].patronym
+				local mothername = people[x.mother].givennym .. "." .. people[x.mother].patronym
 				local isalive
-				if seed_cohort[x.mother].alive then isalive = "blue" else isalive = "gray" end
-				g:write("\n\t\t" .. x.mother .. " [shape=circle,color="..isalive..",label=\""..mothername.."("..seed_cohort[x.mother].age..")\"]")
+				if people[x.mother].alive then isalive = "blue" else isalive = "gray" end
+				g:write("\n\t\t" .. x.mother .. " [shape=circle,color="..isalive..",label=\""..mothername.."("..people[x.mother].age..")\"]")
 				g:write("\n\t\t" .. x.mother .. "->" .. x.id .. " [color=blue]")
-				addParents(seed_cohort[x.mother],level+1)
+				addParents(people[x.mother],level+1)
 			end
 			if x.father then
-				local fathername = seed_cohort[x.father].givennym .. "." .. seed_cohort[x.father].patronym
+				local fathername = people[x.father].givennym .. "." .. people[x.father].patronym
 				local isalive
-				if seed_cohort[x.father].alive then isalive = "blue" else isalive = "gray" end
-				g:write("\n\t\t" .. x.father .. " [shape=square,color="..isalive..",label=\""..fathername.."("..seed_cohort[x.father].age..")\"]")
+				if people[x.father].alive then isalive = "blue" else isalive = "gray" end
+				g:write("\n\t\t" .. x.father .. " [shape=square,color="..isalive..",label=\""..fathername.."("..people[x.father].age..")\"]")
 				g:write("\n\t\t" .. x.father .. "->" .. x.id .. " [color=red]")
-				addParents(seed_cohort[x.father],level+1)
+				addParents(people[x.father],level+1)
 			end
 		end
 		function addChildren(x)
 			_.each(x.children, function(c)
-				local child = seed_cohort[c]
+				local child = people[c]
 				local childname = child.givennym .. "." .. child.patronym
 				local isalive = child.alive and "blue" or "gray"
 				local shape = child.gender == "M" and "square" or "circle"
