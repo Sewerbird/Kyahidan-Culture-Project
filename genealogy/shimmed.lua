@@ -177,13 +177,6 @@ function _.map(arr, fn)
 	return ret
 end
 
-function _.mapM(arr, fn)
-	each(arr, function(x, i, arr)
-		arr[i] = fn(x, i, arr)
-	end)
-	return arr
-end
-
 function _.isEqual(a, b)
 	-- won't compare metatable
 	if a == b then return true end
@@ -286,6 +279,20 @@ function _.filter(arr, fn)
 		end
 	end)
 	return ret
+end
+
+function _.groupBy(arr, fn)
+	local results = {}
+	each(arr, function(x)
+		local group = fn(x)
+		if group ~= nil then
+			if not results[group] then
+				results[group] = {}
+			end
+			push(results[group],x)
+		end
+	end)
+	return results
 end
 
 function _.sample(arr)
