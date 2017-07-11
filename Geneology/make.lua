@@ -6,26 +6,24 @@ require 'make_utils'
 --Configuration
 
 local years_to_simulate = arg[1]
-local summary_period = 1
-local male_female_population_ratio = 0.47 / 0.53
 local people_population = arg[2]
-local infant_yearly_death_chance = 0.07 -- 0-2
-local child_yearly_death_chance = 0.03 -- 3-9
-local pubescent_yearly_death_chance = 0.05 -- 10-14
-local adult_yearly_death_chance = 0.03 -- 15-49
-local elder_yearly_death_chance = 0.09 -- 50+
+local infant_yearly_death_chance = 0.07
+local child_yearly_death_chance = 0.03
+local pubescent_yearly_death_chance = 0.05
+local adult_yearly_death_chance = 0.03
+local elder_yearly_death_chance = 0.09
 local married_reproduction_chance = 0.50
 local affair_reproduction_chance = 0.60
-local marriage_market_eligibility_chance = 0.40
-local yearly_proclivity_to_have_affair = 0.03
+local yearly_marriage_chance = 0.40
+local yearly_affair_chance = 0.03
 local yearly_divorce_chance = 0.01
 local only_marries_locally_chance = 0.7
 local has_affair_locally_chance = 0.6
-local retire_with_children_chance = 1.0
+local retire_with_children_chance = 0.9
 local infanthood_age = 0
 local childhood_age = 3
 local pubescent_age = 10
-local adulthood_age = 15 -- age at which marriage is allowed
+local adulthood_age = 15
 local spinster_age = 36
 local menopause_age = 40
 local elder_age = 50
@@ -136,96 +134,98 @@ function simulate_year(people, working_set, locations)
 	end)
 
 	--Do Marriage
-	--1. Travel to a marriage market
-	local marriage_markets = _.groupBy(working_set, function(id)
-		local x = people[id]
-		--Fundamental eligibility
-		if x.alive and not x.married and x.age >= adulthood_age and x.age < elder_age then
-			--Gendered eligibility
-			if (x.gender == "M" and x.genetic > 0.0) or
-				(x.gender == "F" and x.age < spinster_age) then
-				--Participation
-				if math.random() < marriage_market_eligibility_chance then
+	_.forIn(
+		_.groupBy(working_set, function(id)
+			local x = people[id]
+			--Fundamental eligibility
+			if x.alive and not x.married and x.age >= adulthood_age and x.age < elder_age then
+				--Gendered eligibility
+				if (x.gender == "M" and x.genetic > 0.0) or
+					(x.gender == "F" and x.age < spinster_age) then
+					--Participation
+					if math.random() < yearly_marriage_chance then
+						--Location
+						if math.random() < only_marries_locally_chance then
+							return x.location
+						else
+							return _.sample(locations)
+						end
+					end
+				end
+			end
+			return nil
+		end),
+		function(participants, market)
+			local brides = _.sort(_.filter(participants, function(id) return people[id].gender == "F" end), function(a,b) return people[a].genetic < people[b].genetic end)
+			local grooms = _.sort(_.filter(participants, function(id) return people[id].gender == "M" end), function(a,b) return people[a].genetic < people[b].genetic end)
+			for i = 1, #brides do
+				if grooms and grooms[i] then
+					-- incest taboo
+					local bride = brides[i]
+					local groom = grooms[i]
+					local bridemother = people[bride].mother
+					local bridefather = people[bride].father
+					local groommother = people[groom].mother
+					local groomfather = people[groom].father
+					if not(
+						(bridemother and groommother and (bridemother == groommother)) or
+						(bridefather and groomfather and (bridefather == groomfather))) then
+						people[groom].married = true
+						people[bride].married = true
+						people[groom].spouse = bride
+						people[bride].spouse = groom
+						if groom_joins_bride_household then 
+							people[groom].household = people[bride].household
+							people[groom].location = people[bride].location
+						elseif bride_joins_groom_household then
+							people[bride].household = people[groom].household
+							people[bride].location = people[groom].location
+						elseif couples_begin_new_household then
+							people[groom].household = household_cntr
+							people[bride].household = household_cntr
+							people[groom].location = math.random() > 0.5 and people[groom].location or people[bride].location
+							people[bride].location = people[groom].location
+							household_cntr = household_cntr + 1
+						end
+					end
+				end
+			end
+		end
+	)
+
+	-- Handle Affairs
+	_.forIn(
+		_.groupBy(working_set, 
+			function(id)
+				local x = people[id]
+				if x.alive and 
+					x.married and 
+					x.age >= adulthood_age and x.age < elder_age and 
+					((x.gender == "M" and x.genetic > 0.25) or
+					(x.gender == "F" and x.age < spinster_age)) and 
+					math.random() < yearly_affair_chance then
 					--Location
-					if math.random() < only_marries_locally_chance then
+					if math.random() < has_affair_locally_chance then
 						return x.location
 					else
 						return _.sample(locations)
 					end
 				end
-			end
-		end
-		return nil
-	end)
-	--2. Marry off brides to grooms in each marriage market
-	_.forIn(marriage_markets, function(participants, market)
-		local brides = _.sort(_.filter(participants, function(id) return people[id].gender == "F" end), function(a,b) return people[a].genetic < people[b].genetic end)
-		local grooms = _.sort(_.filter(participants, function(id) return people[id].gender == "M" end), function(a,b) return people[a].genetic < people[b].genetic end)
-		for i = 1, #brides do
-			if grooms and grooms[i] then
-				-- incest taboo
-				local bride = brides[i]
-				local groom = grooms[i]
-				local bridemother = people[bride].mother
-				local bridefather = people[bride].father
-				local groommother = people[groom].mother
-				local groomfather = people[groom].father
-				if not(
-					(bridemother and groommother and (bridemother == groommother)) or
-					(bridefather and groomfather and (bridefather == groomfather))) then
-					people[groom].married = true
-					people[bride].married = true
-					people[groom].spouse = bride
-					people[bride].spouse = groom
-					if groom_joins_bride_household then 
-						people[groom].household = people[bride].household
-						people[groom].location = people[bride].location
-					elseif bride_joins_groom_household then
-						people[bride].household = people[groom].household
-						people[bride].location = people[groom].location
-					elseif couples_begin_new_household then
-						people[groom].household = household_cntr
-						people[bride].household = household_cntr
-						people[groom].location = math.random() > 0.5 and people[groom].location or people[bride].location
-						people[bride].location = people[groom].location
-						household_cntr = household_cntr + 1
+				return nil
+			end),
+		function(participants, market)
+			local women = _.sort(_.filter(participants, function(id) return people[id].gender == "F" end), function(a,b) return people[a].genetic < people[b].genetic end)
+			local men = _.sort(_.filter(participants, function(id) return people[id].gender == "M" end), function(a,b) return people[a].genetic < people[b].genetic end)
+			for i = 1, #women do
+				if men and men[i] and people[men[i]].genetic > people[people[women[i]].spouse].genetic and math.random() < affair_reproduction_chance then
+					if people[women[i]].fertile and x.pregnant == false then
+						people[women[i]].pregnant = true 
+						people[women[i]].fetus_is_bastard_of = men[i]
 					end
 				end
 			end
 		end
-
-	end)
-
-	-- Handle Affairs
-	local affair_markets = _.groupBy(working_set, function(id)
-		local x = people[id]
-		if x.alive and 
-			x.married and 
-			x.age >= adulthood_age and x.age < elder_age and 
-			((x.gender == "M" and x.genetic > 0.25) or
-			(x.gender == "F" and x.age < spinster_age)) and 
-			math.random() < yearly_proclivity_to_have_affair then
-			--Location
-			if math.random() < has_affair_locally_chance then
-				return x.location
-			else
-				return _.sample(locations)
-			end
-		end
-		return nil
-	end)
-	_.forIn(affair_markets, function(participants, market)
-		local women = _.sort(_.filter(participants, function(id) return people[id].gender == "F" end), function(a,b) return people[a].genetic < people[b].genetic end)
-		local men = _.sort(_.filter(participants, function(id) return people[id].gender == "M" end), function(a,b) return people[a].genetic < people[b].genetic end)
-		for i = 1, #women do
-			if men and men[i] and people[men[i]].genetic > people[people[women[i]].spouse].genetic and math.random() < affair_reproduction_chance then
-				if people[women[i]].fertile and x.pregnant == false then
-					people[women[i]].pregnant = true 
-					people[women[i]].fetus_is_bastard_of = men[i]
-				end
-			end
-		end
-	end)
+	)
 
 
 	-- Handle Birth & Pregnancy
@@ -268,59 +268,62 @@ function simulate_year(people, working_set, locations)
 
 	-- Handle Divorces
 	local broken_homes = {}
-	_.forIn(household_bins, function(housemates, household_id) 
-		if math.random() < yearly_divorce_chance then
-			_.sample(_.compact(_.map(housemates, function(housemate) 
-				local a = people[housemate]
-				if a.married and 
-					a.age < elder_age and 
-					people[a.spouse].age < elder_age and 
-					people[a.spouse].alive and 
-					people[a.spouse].household == a.household then
-					if a.gender == "M" then 
-						table.insert(broken_homes, { household = household_id, husband = a.id, wife = a.spouse })
-					elseif a.gender == "F" then 
-						table.insert(broken_homes, { household = household_id, husband = a.spouse, wife = a.id })
-					end
+	_.each(
+		_.forIn(household_bins, 
+			function(housemates, household_id) 
+				if math.random() < yearly_divorce_chance then
+					_.sample(_.compact(_.map(housemates, function(housemate) 
+						local a = people[housemate]
+						if a.married and 
+							a.age < elder_age and 
+							people[a.spouse].age < elder_age and 
+							people[a.spouse].alive and 
+							people[a.spouse].household == a.household then
+							if a.gender == "M" then 
+								table.insert(broken_homes, { household = household_id, husband = a.id, wife = a.spouse })
+							elseif a.gender == "F" then 
+								table.insert(broken_homes, { household = household_id, husband = a.spouse, wife = a.id })
+							end
+						end
+					end)))
 				end
-			end)))
-		end
-	end)
-	_.each(broken_homes, function(broken_home) 
-		local husband = people[broken_home.husband]
-		local wife = people[broken_home.wife]
-		local others = _.filter(household_bins[broken_home.household], function(person) 
-			return person ~= broken_home.husband and person ~= broken_home.wife 
-		end)
+			end),
+		function(broken_home) 
+			local husband = people[broken_home.husband]
+			local wife = people[broken_home.wife]
+			local others = _.filter(household_bins[broken_home.household], function(person) 
+				return person ~= broken_home.husband and person ~= broken_home.wife 
+			end)
 
-		--Old Testament assumptions
+			--Old Testament assumptions
 
-		husband.married = false 
-		wife.married = false
-		table.insert(husband.divorces, wife.id)
-		table.insert(wife.divorces, husband.id)
+			husband.married = false 
+			wife.married = false
+			table.insert(husband.divorces, wife.id)
+			table.insert(wife.divorces, husband.id)
 
-		local wifes_pater = wife.foster and wife.foster or wife.father 
-		if wifes_pater and people[wifes_pater].alive and people[wifes_pater].household ~= wife.household then
-			wife.household = people[wifes_pater].household
-		elseif wifes_pater and people[wifes_pater].spouse and people[people[wifes_pater].spouse].alive and people[people[wifes_pater].spouse].household ~= wife.household then
-			wife.household = people[people[wifes_pater].spouse].household 
-		else
-			wife.household = household_cntr
-			household_cntr = household_cntr + 1
-		end
-		_.each(others, function(id) 
-			local x = people[id]
-			if x.foster == wife.id then x.household = wife.household
-			elseif x.age < pubescent_age and x.mother == wife.id then x.household = wife.household
-			elseif wife.mother == id or wife.father == id then x.household = wife.household
-			elseif x.father == husband.id then x.household = husband.household
+			local wifes_pater = wife.foster and wife.foster or wife.father 
+			if wifes_pater and people[wifes_pater].alive and people[wifes_pater].household ~= wife.household then
+				wife.household = people[wifes_pater].household
+			elseif wifes_pater and people[wifes_pater].spouse and people[people[wifes_pater].spouse].alive and people[people[wifes_pater].spouse].household ~= wife.household then
+				wife.household = people[people[wifes_pater].spouse].household 
 			else
-				x.household = household_cntr
+				wife.household = household_cntr
 				household_cntr = household_cntr + 1
 			end
-		end)
-	end)
+			_.each(others, function(id) 
+				local x = people[id]
+				if x.foster == wife.id then x.household = wife.household
+				elseif x.age < pubescent_age and x.mother == wife.id then x.household = wife.household
+				elseif wife.mother == id or wife.father == id then x.household = wife.household
+				elseif x.father == husband.id then x.household = husband.household
+				else
+					x.household = household_cntr
+					household_cntr = household_cntr + 1
+				end
+			end)
+		end
+	)
 
 	--Cleanup working set: dead people lie in peace
 	working_set = _.filter(working_set, function(id)
