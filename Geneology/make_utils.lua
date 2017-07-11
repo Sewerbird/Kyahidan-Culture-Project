@@ -125,6 +125,28 @@ end
 
 --Utility (Data)
 
+function ngr(x) 
+	if x == nil then 
+		return ""
+	elseif 'table' == type(x) then
+		local z = _.reduce(x, function(acc,k)
+			if acc == nil then
+				return "\"" .. k .. "\""
+			else
+				return acc .. ",\"" .. k .. "\""
+			end
+		end,nil)
+		return "[" .. (z and z or "") .. "]"
+	else 
+		return "\""..tostring(x).."\""
+	end 
+end
+
+function logEvent(logfile, year, type, ...)
+	local data = {...}
+	logfile:write(ngr(year)..","..ngr(type)..","..ngr(data).."\n")
+end
+
 function export_people_csv(path, people)
 	--Perform data dump
 	local exported_fields = {
@@ -149,26 +171,10 @@ function export_people_csv(path, people)
 		"location"
 	}
 
-	local function ngr(x) 
-		if x == nil then 
-			return ""
-		elseif 'table' == type(x) then
-			return _.reduce(x, function(acc,k)
-				if acc == nil then
-					return "" .. k
-				else
-					return acc .. "&" .. k
-				end
-			end,"")
-		else 
-			return tostring(x) 
-		end 
-	end
-
 	local f = assert(io.open(path, "w"))
 	f:write(_.reduce(exported_fields, function(str, field, i, arr) 
-		if i == #arr then return str .. field end
-		return str .. field .. ", " 
+		if i == #arr then return str .. "\""..field.."\"" end
+		return str .. "\"" .. field .. "\", " 
 	end, ""))
 	_.each(people, function(x) 
 		f:write(_.reduce(exported_fields, function(str, field, i, arr) 

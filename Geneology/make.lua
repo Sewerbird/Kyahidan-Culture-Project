@@ -38,7 +38,7 @@ math.randomseed(os.time())
 
 local people = {}
 local working_set = {}
-local locations = {"Aville","Burb","Chamlet","Dshire","Ecity","Fhill","Gvalley","IFalls"}
+local locations = {"Aville","Burb","Chamlet"}
 
 local household_cntr = 1
 for i = 1, people_population do
@@ -48,7 +48,7 @@ for i = 1, people_population do
 	table.insert(people, friend)
 end
 
-function simulate_year(people, working_set, locations)
+function simulate_year(log, year, people, working_set, locations)
 	local household_bins = _.groupBy(working_set, function(id) return people[id].household end)
 
 	--Do Aging
@@ -64,6 +64,7 @@ function simulate_year(people, working_set, locations)
 		or (age >= maximum_age)) then
 			people[id].alive = false
 			people[id].deathyear = year
+			logEvent(log,year,"death",id)
 			--Handle widows & widowers
 			if x.married then
 				local spouse = people[x.spouse]
@@ -174,6 +175,7 @@ function simulate_year(people, working_set, locations)
 						people[bride].married = true
 						people[groom].spouse = bride
 						people[bride].spouse = groom
+						logEvent(log,year,"marriage",groom,bride)
 						if groom_joins_bride_household then 
 							people[groom].household = people[bride].household
 							people[groom].location = people[bride].location
@@ -217,8 +219,9 @@ function simulate_year(people, working_set, locations)
 			local women = _.sort(_.filter(participants, function(id) return people[id].gender == "F" end), function(a,b) return people[a].genetic < people[b].genetic end)
 			local men = _.sort(_.filter(participants, function(id) return people[id].gender == "M" end), function(a,b) return people[a].genetic < people[b].genetic end)
 			for i = 1, #women do
-				if men and men[i] and people[men[i]].genetic > people[people[women[i]].spouse].genetic and math.random() < affair_reproduction_chance then
-					if people[women[i]].fertile and x.pregnant == false then
+				if men and men[i] and people[men[i]].genetic > people[people[women[i]].spouse].genetic then
+					logEvent(log, year, "affair", men[i], women[i])
+					if math.random() < affair_reproduction_chance and people[women[i]].fertile and x.pregnant == false then
 						people[women[i]].pregnant = true 
 						people[women[i]].fetus_is_bastard_of = men[i]
 					end
@@ -226,7 +229,6 @@ function simulate_year(people, working_set, locations)
 			end
 		end
 	)
-
 
 	-- Handle Birth & Pregnancy
 	_.each(working_set, function(id)
@@ -245,6 +247,7 @@ function simulate_year(people, working_set, locations)
 				--Assume cuckold adopts
 				baby.patronym = people[x.spouse].patronym 
 				baby.foster = x.spouse
+				logEvent(log, year, "bastard_adoption", baby.id, baby.foster, baby.mother, baby.is_bastard_of)
 			end
 			table.insert(people,baby)
 			table.insert(working_set,baby.id)
@@ -254,6 +257,7 @@ function simulate_year(people, working_set, locations)
 			end
 			people[id].pregnant = false
 			people[id].fetus_is_bastard_of = nil
+			logEvent(log,year,"birth",baby.id, baby.father, baby.mother)
 		elseif x.alive 
 		and x.married 
 		and x.gender == "F"
@@ -268,62 +272,60 @@ function simulate_year(people, working_set, locations)
 
 	-- Handle Divorces
 	local broken_homes = {}
-	_.each(
-		_.forIn(household_bins, 
-			function(housemates, household_id) 
-				if math.random() < yearly_divorce_chance then
-					_.sample(_.compact(_.map(housemates, function(housemate) 
-						local a = people[housemate]
-						if a.married and 
-							a.age < elder_age and 
-							people[a.spouse].age < elder_age and 
-							people[a.spouse].alive and 
-							people[a.spouse].household == a.household then
-							if a.gender == "M" then 
-								table.insert(broken_homes, { household = household_id, husband = a.id, wife = a.spouse })
-							elseif a.gender == "F" then 
-								table.insert(broken_homes, { household = household_id, husband = a.spouse, wife = a.id })
-							end
-						end
-					end)))
+	_.forIn(household_bins, function(housemates, household_id) 
+		if math.random() < yearly_divorce_chance then
+			_.sample(_.compact(_.map(housemates, function(housemate) 
+				local a = people[housemate]
+				if a.married and 
+					a.age < elder_age and 
+					people[a.spouse].age < elder_age and 
+					people[a.spouse].alive and 
+					people[a.spouse].household == a.household then
+					if a.gender == "M" then 
+						table.insert(broken_homes, { household = household_id, husband = a.id, wife = a.spouse })
+					elseif a.gender == "F" then 
+						table.insert(broken_homes, { household = household_id, husband = a.spouse, wife = a.id })
+					end
 				end
-			end),
-		function(broken_home) 
-			local husband = people[broken_home.husband]
-			local wife = people[broken_home.wife]
-			local others = _.filter(household_bins[broken_home.household], function(person) 
-				return person ~= broken_home.husband and person ~= broken_home.wife 
-			end)
+			end)))
+		end
+	end)
+	_.each(broken_homes, function(broken_home) 
+		local husband = people[broken_home.husband]
+		local wife = people[broken_home.wife]
+		local others = _.filter(household_bins[broken_home.household], function(person) 
+			return person ~= broken_home.husband and person ~= broken_home.wife 
+		end)
 
-			--Old Testament assumptions
+		--Old Testament assumptions
 
-			husband.married = false 
-			wife.married = false
-			table.insert(husband.divorces, wife.id)
-			table.insert(wife.divorces, husband.id)
+		husband.married = false 
+		wife.married = false
+		table.insert(husband.divorces, wife.id)
+		table.insert(wife.divorces, husband.id)
+		logEvent(log,year,"divorce",husband.id,wife.id)
 
-			local wifes_pater = wife.foster and wife.foster or wife.father 
-			if wifes_pater and people[wifes_pater].alive and people[wifes_pater].household ~= wife.household then
-				wife.household = people[wifes_pater].household
-			elseif wifes_pater and people[wifes_pater].spouse and people[people[wifes_pater].spouse].alive and people[people[wifes_pater].spouse].household ~= wife.household then
-				wife.household = people[people[wifes_pater].spouse].household 
+		local wifes_pater = wife.foster and wife.foster or wife.father 
+		if wifes_pater and people[wifes_pater].alive and people[wifes_pater].household ~= wife.household then
+			wife.household = people[wifes_pater].household
+		elseif wifes_pater and people[wifes_pater].spouse and people[people[wifes_pater].spouse].alive and people[people[wifes_pater].spouse].household ~= wife.household then
+			wife.household = people[people[wifes_pater].spouse].household 
+		else
+			wife.household = household_cntr
+			household_cntr = household_cntr + 1
+		end
+		_.each(others, function(id) 
+			local x = people[id]
+			if x.foster == wife.id then x.household = wife.household
+			elseif x.age < pubescent_age and x.mother == wife.id then x.household = wife.household
+			elseif wife.mother == id or wife.father == id then x.household = wife.household
+			elseif x.father == husband.id then x.household = husband.household
 			else
-				wife.household = household_cntr
+				x.household = household_cntr
 				household_cntr = household_cntr + 1
 			end
-			_.each(others, function(id) 
-				local x = people[id]
-				if x.foster == wife.id then x.household = wife.household
-				elseif x.age < pubescent_age and x.mother == wife.id then x.household = wife.household
-				elseif wife.mother == id or wife.father == id then x.household = wife.household
-				elseif x.father == husband.id then x.household = husband.household
-				else
-					x.household = household_cntr
-					household_cntr = household_cntr + 1
-				end
-			end)
-		end
-	)
+		end)
+	end)
 
 	--Cleanup working set: dead people lie in peace
 	working_set = _.filter(working_set, function(id)
@@ -334,12 +336,12 @@ function simulate_year(people, working_set, locations)
 end
 
 --Simulate
+local log = assert(io.open("output/event.log", "w"))
 for year = 1, years_to_simulate do
-	people, working_set, locations = simulate_year(people, working_set, locations)
+	people, working_set, locations = simulate_year(log, year, people, working_set, locations)
 	print("Year " .. year .. ". Working set is " .. #working_set .. " of " .. #people .. ". ")
 end
-
---Do Export
+log.close()
 export_people_csv("output/geneology.csv",people)
 
 do --Draw Graphs
