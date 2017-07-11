@@ -336,12 +336,10 @@ end
 --Simulate
 for year = 1, years_to_simulate do
 	people, working_set, locations = simulate_year(people, working_set, locations)
-
 	print("Year " .. year .. ". Working set is " .. #working_set .. " of " .. #people .. ". ")
 end
 
 --Do Export
-
 export_people_csv("output/geneology.csv",people)
 
 do --Draw Graphs
@@ -425,7 +423,7 @@ do --Draw Graphs
 
 	do --Draw All Locations in One Map
 		local folks_by_location = _.groupBy(working_set, function(x) return locations[people[x].location] end)
-		local g = assert(io.open("output/town_tree.viz", "w"))
+		local g = assert(io.open("output/region_map.viz", "w"))
 		g:write("strict digraph G {\n\tcompound=true;\n\toverlap=prism;")
 		for location = 1, #locations do
 			drawFullLocation(g,location,folks_by_location[locations[location]],true)
