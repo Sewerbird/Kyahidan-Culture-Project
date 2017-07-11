@@ -1,6 +1,6 @@
 --Imports
-local inspect = require 'inspect'
-local _ = require 'shimmed'
+local inspect = require 'lib/inspect'
+local _ = require 'lib/shimmed'
 require 'make_utils'
 
 --Configuration
@@ -18,6 +18,7 @@ local married_reproduction_chance = 0.50
 local affair_reproduction_chance = 0.60
 local marriage_market_eligibility_chance = 0.40
 local yearly_proclivity_to_have_affair = 0.03
+local yearly_divorce_chance = 0.01
 local only_marries_locally_chance = 0.7
 local has_affair_locally_chance = 0.6
 local retire_with_children_chance = 1.0
@@ -226,6 +227,7 @@ function simulate_year(people, working_set, locations)
 		end
 	end)
 
+
 	-- Handle Birth & Pregnancy
 	_.each(working_set, function(id)
 		local x = people[id]
@@ -264,6 +266,62 @@ function simulate_year(people, working_set, locations)
 		end
 	end)
 
+	-- Handle Divorces
+	local broken_homes = {}
+	_.forIn(household_bins, function(housemates, household_id) 
+		if math.random() < yearly_divorce_chance then
+			_.sample(_.compact(_.map(housemates, function(housemate) 
+				local a = people[housemate]
+				if a.married and 
+					a.age < elder_age and 
+					people[a.spouse].age < elder_age and 
+					people[a.spouse].alive and 
+					people[a.spouse].household == a.household then
+					if a.gender == "M" then 
+						table.insert(broken_homes, { household = household_id, husband = a.id, wife = a.spouse })
+					elseif a.gender == "F" then 
+						table.insert(broken_homes, { household = household_id, husband = a.spouse, wife = a.id })
+					end
+				end
+			end)))
+		end
+	end)
+	_.each(broken_homes, function(broken_home) 
+		local husband = people[broken_home.husband]
+		local wife = people[broken_home.wife]
+		local others = _.filter(household_bins[broken_home.household], function(person) 
+			return person ~= broken_home.husband and person ~= broken_home.wife 
+		end)
+
+		--Old Testament assumptions
+
+		husband.married = false 
+		wife.married = false
+		table.insert(husband.divorces, wife.id)
+		table.insert(wife.divorces, husband.id)
+
+		local wifes_pater = wife.foster and wife.foster or wife.father 
+		if wifes_pater and people[wifes_pater].alive and people[wifes_pater].household ~= wife.household then
+			wife.household = people[wifes_pater].household
+		elseif wifes_pater and people[wifes_pater].spouse and people[people[wifes_pater].spouse].alive and people[people[wifes_pater].spouse].household ~= wife.household then
+			wife.household = people[people[wifes_pater].spouse].household 
+		else
+			wife.household = household_cntr
+			household_cntr = household_cntr + 1
+		end
+		_.each(others, function(id) 
+			local x = people[id]
+			if x.foster == wife.id then x.household = wife.household
+			elseif x.age < pubescent_age and x.mother == wife.id then x.household = wife.household
+			elseif wife.mother == id or wife.father == id then x.household = wife.household
+			elseif x.father == husband.id then x.household = husband.household
+			else
+				x.household = household_cntr
+				household_cntr = household_cntr + 1
+			end
+		end)
+	end)
+
 	--Cleanup working set: dead people lie in peace
 	working_set = _.filter(working_set, function(id)
 		return people[id].alive
@@ -281,7 +339,7 @@ end
 
 --Do Export
 
-export_people_csv("geneology.csv",people)
+export_people_csv("output/geneology.csv",people)
 
 do --Draw Graphs
 	local function drawPerson(context, id, whitespaceprefix)
@@ -321,6 +379,14 @@ do --Draw Graphs
 			((sameHouse and x.household == people[x.is_bastard_of].household) or (not sameHouse)) then
 			context:write("\n\t".. x.is_bastard_of .. "->" .. id .. " [color=green];")
 		end
+		if #x.divorces > 0 then
+			_.each(x.divorces, function(divorcee)
+				if ((sameLoc and x.location == people[divorcee].location) or (not sameLoc)) and
+					((sameHouse and x.household == people[divorcee].household) or (not sameHouse)) then
+					context:write("\n\t"..divorcee.."->"..id.." [color=cyan];")
+				end
+			end)
+		end
 
 	end
 	local function drawFullLocation(context, location, location_working_set, out_of_town_is_out_of_town)
@@ -356,7 +422,7 @@ do --Draw Graphs
 
 	do --Draw All Locations in One Map
 		local folks_by_location = _.groupBy(working_set, function(x) return locations[people[x].location] end)
-		local g = assert(io.open("town_tree.viz", "w"))
+		local g = assert(io.open("output/town_tree.viz", "w"))
 		g:write("strict digraph G {\n\tcompound=true;\n\toverlap=prism;")
 		for location = 1, #locations do
 			drawFullLocation(g,location,folks_by_location[locations[location]],true)
@@ -368,7 +434,7 @@ do --Draw Graphs
 	do --Draw Each Location on Own Map
 		local folks_by_location = _.groupBy(working_set, function(x) return locations[people[x].location] end)
 		for location = 1, #locations do
-			local g = assert(io.open("town_map_"..locations[location]..".viz", "w"))
+			local g = assert(io.open("output/town_map_"..locations[location]..".viz", "w"))
 			g:write("strict digraph G {\n\tcompound=true;\n\toverlap=prism;")
 			drawFullLocation(g,location,folks_by_location[locations[location]],false)
 			g:write("\n}")
@@ -378,7 +444,7 @@ do --Draw Graphs
 
 	do --Sample a living person and show their full lineage
 		for i = 1, sample_people do
-			local g = assert(io.open("sample_person_"..i..".viz", "w"))
+			local g = assert(io.open("output/sample_person_"..i..".viz", "w"))
 			g:write("strict digraph G {compound=true; overlap=scale;")
 			g:write("\n\tsubgraph cluster_ancestors {")
 				local sample = people[_.sample(working_set)]

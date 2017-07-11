@@ -1,4 +1,4 @@
-local _ = require 'shimmed'
+local _ = require 'lib/shimmed'
 
 local lastnames_path = "CSV_Database_of_Last_Names.csv"
 
@@ -83,6 +83,7 @@ function random_person(new_id, location_id, household_id)
 		mother = nil,
 		foster = nil,
 		children = {},
+		divorces = {},
 		widowedBy = {},
 		age = math.random(10,30),
 		genetic = math.random(),
@@ -112,6 +113,7 @@ function baby_person(mom,dad)
 		household = mom.household,
 		location = mom.location,
 		children = {},
+		divorces = {},
 		widowedBy = {},
 		age = 0,
 		givennym = alphabet[math.random(1,26)],
