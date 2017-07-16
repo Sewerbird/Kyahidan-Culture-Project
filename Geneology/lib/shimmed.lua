@@ -296,6 +296,7 @@ function _.groupBy(arr, fn)
 end
 
 function _.sample(arr)
+	if #arr == 0 then return nil end
 	local r = math.random(1,#arr)
 	return arr[r]
 end

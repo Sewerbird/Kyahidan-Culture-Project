@@ -1,4 +1,6 @@
-local _ = require 'lib/shimmed'
+local _ = require 'lib/lodash'
+local inspect = require 'lib/inspect'
+local mendel = require 'mendel'
 
 local lastnames_path = "CSV_Database_of_Last_Names.csv"
 
@@ -34,8 +36,8 @@ function get_living_descendents(people, id, depth, acc)
 	return acc
 end
 
-function relatives_by_distance(people, id, distance, max_distance, breadcrumb)
-	local me = people[id]
+function relatives_by_distance(id, distance, max_distance, breadcrumb)
+	local me = lookupPerson(id)
 
 	local outbound = _.flatten({ me.mother, me.father, me.children })
 	local recurse = {}
@@ -48,7 +50,7 @@ function relatives_by_distance(people, id, distance, max_distance, breadcrumb)
 						breadcrumb[r] = true 
 					end
 				end)
-				breadcrumb = relatives_by_distance(people, relative, distance+1, max_distance, breadcrumb) 
+				breadcrumb = relatives_by_distance(relative, distance+1, max_distance, breadcrumb) 
 			end
 		end)
 	end
@@ -60,10 +62,10 @@ function relatives_by_distance(people, id, distance, max_distance, breadcrumb)
 	return breadcrumb
 end
 
-function get_living_housemates(people, working_set, id)
-	local me = people[id]
+function get_living_housemates(working_set, id)
+	local me = lookupPerson(id)
 	return _.filter(working_set, function(id) 
-		return people[id].household == me.household and people[id].alive
+		return lookupPerson(id).household == me.household and lookupPerson(id).alive
 	end)
 end
 
@@ -85,8 +87,9 @@ function random_person(new_id, location_id, household_id)
 		children = {},
 		divorces = {},
 		widowedBy = {},
-		age = math.random(10,30),
+		age = 15,--math.random(10,30),
 		genetic = math.random(),
+		genome = mendel.randomGenome(),
 		givennym = alphabet[math.random(1,26)],
 		patronym = lastnames[math.random(1,#lastnames)],
 		household = household_id,
@@ -119,27 +122,144 @@ function baby_person(mom,dad)
 		givennym = alphabet[math.random(1,26)],
 		patronym = dad.patronym,
 		genetic = (dad.genetic + mom.genetic + math.random())/3,
+		genome = mendel.reproduce(mom.genome, dad.genome),
 		birthday = math.random() -- % through year e.g.: 0.088 is evening of February 1st
 	}
 end
 
 --Utility (Data)
 
+local exported_fields = {
+	"id",
+	"givennym",
+	"patronym",
+	"gender",
+	"alive",
+	"married",
+	"pregnant",
+	"fertile",
+	"orphaned",
+	"father",
+	"mother",
+	"foster",
+	"spouse",
+	"children",
+	"widowedBy",
+	"age",
+	"genetic",
+	"genome",
+	"birthyear",
+	"deathyear",
+	"household",
+	"location"
+}
+
 function ngr(x) 
 	if x == nil then 
 		return ""
 	elseif 'table' == type(x) then
 		local z = _.reduce(x, function(acc,k)
-			if acc == nil then
-				return "\"" .. k .. "\""
+			if acc == "" then
+				return "\'" .. k .. "\'"
 			else
-				return acc .. ",\"" .. k .. "\""
+				return acc .. ",\'" .. k .. "\'"
 			end
-		end,nil)
-		return "[" .. (z and z or "") .. "]"
+		end,"")
+		return "[" .. z .. "]"
+	elseif tonumber(x) ~= nil then
+		return x
 	else 
-		return "\""..tostring(x).."\""
+		return "\'"..tostring(x).."\'"
 	end 
+end
+
+local lookup_db = nil
+local lookup_cache = nil
+
+function setupLookup(db, cache)
+	lookup_db = db 
+	lookup_cache = cache 
+
+	local schema = _.reduce(exported_fields, function(acc, e) 
+		if acc == "" then return "\""..e.."\"" else return acc .. ", " .. "\""..e.."\"" end
+	end,"")
+	lookup_db:exec(string.format("CREATE TABLE people ( %s )",schema))
+end
+
+function lookupPerson(id)
+	for a in lookup_db:rows(string.format("SELECT * FROM people WHERE id = %i LIMIT 1", id)) do
+		local result = {}
+		for i = 1, #exported_fields do
+			local k = exported_fields[i]
+			local v = a[i]
+			if k == 'married' or k == 'pregnant' or k == 'fertile' or k == 'alive' then
+				v = (v == 1 and true or false)
+			elseif k == 'widowedBy' or k == 'children' or k == 'genome' then
+				local t={} ; i=1
+		        for str in string.gmatch(v, "([^".."',".."]+)") do
+		        	str = str:gsub('\\[',""):gsub('\\]',"")
+		        	if str ~= "" and str ~= "[" and str ~= "]" and str ~= "[]" then
+		                t[i] = str
+		                i = i + 1
+		            end
+		        end
+		        v = t
+			end
+			if v == "nil" then
+				v = nil
+			end
+			result[k] = v
+		end
+		return result
+	end
+end
+
+function modifyPerson(id, key, value)
+	local cmd = string.format("UPDATE people SET %s = %s WHERE id = %i",key,ngr(value),id)
+	lookup_db:exec(cmd)
+	if lookup_db:errcode() > 0 then
+		error("ERROR modifying:" .. lookup_db:errmsg())
+	end
+end
+
+function insertPerson(person)
+	print("INSERTING A PERSON")
+	local schema = _.reduce(exported_fields, function(acc, e) 
+		if acc == "" then return e else return acc .. ", " .. e end
+	end,"")
+	local cmd = string.format([[
+		INSERT INTO people (%s) 
+		VALUES (%i,"%s","%s","%s",%i,%i,%i,%i,%i, %s,%s,%s,%s, "%s","%s",%i,%f,"%s","%s","%s","%s",%i)
+	]],
+		schema,
+			person.id,
+			person.givennym,
+			person.patronym,
+			person.gender,
+			(person.alive and 1 or 0),
+			(person.married and 1 or 0),
+			(person.pregnant and 1 or 0),
+			(person.fertile and 1 or 0),
+			(person.orphaned and 1 or 0),
+			person.father or "NULL",
+			person.mother or "NULL",
+			person.foster or "NULL",
+			person.spouse or "NULL",
+			ngr(person.children),
+			ngr(person.widowedBy),
+			person.age,
+			person.genetic,
+			ngr(person.genome),
+			person.birthyear,
+			person.deathyear,
+			person.household,
+			person.location
+	)
+	lookup_db:exec(cmd)
+
+	if lookup_db:errcode() > 0 then
+		error("ERROR " .. lookup_db:errcode() .. ": " .. lookup_db:errmsg())
+	end
 end
 
 function logEvent(logfile, year, type, ...)
@@ -149,27 +269,6 @@ end
 
 function export_people_csv(path, people)
 	--Perform data dump
-	local exported_fields = {
-		"id",
-		"givennym",
-		"patronym",
-		"gender",
-		"alive",
-		"married",
-		"pregnant",
-		"fertile",
-		"father",
-		"mother",
-		"foster",
-		"children",
-		"widowedBy",
-		"age",
-		"genetic",
-		"birthyear",
-		"deathyear",
-		"household",
-		"location"
-	}
 
 	local f = assert(io.open(path, "w"))
 	f:write(_.reduce(exported_fields, function(str, field, i, arr) 
