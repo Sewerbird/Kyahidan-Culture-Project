@@ -14,11 +14,14 @@ Primarily the KCP will achieve two types of goals. The first is to provide an in
 - Oceanography
 - Fishing/Whaling Cultures
 - Non-Agricultural Cultures
+- Geneology
+- Large-Scale Agent Simulation
 
 ### Physical Goals
 
 - Hyperlinked Website of Topics
 - Gazeteer of 100+ Cities, Locales, and Neighborhoods
+- Personal (Programmatically Generated) Histories/Summaries of 100,000's of people
 - Atlas of the known world, at 1cm:2.5km
 - Chronicle covering major events since Kyahidan civilization began
 - Magazine, serving as a survey of current Kyahidan topics (contemporary):
@@ -28,4 +31,4 @@ Primarily the KCP will achieve two types of goals. The first is to provide an in
   - Economics
   - Arts
   - Governance
-- Hardcover illustrated book containing all the above. 100-300 pages. (13x21cm-ish page size)
+- (Hardcover?) illustrated guidebook containing all the above. 100-300 pages. (Like a tourist guide book)

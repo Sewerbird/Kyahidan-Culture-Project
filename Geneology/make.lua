@@ -67,7 +67,10 @@ function simulate_year(log, year, locations)
 		table.insert(working_set,a[1])
 	end
 
+	print("WORKING SET SIZE IS " .. #working_set)
 	local household_bins = _.groupBy(working_set, function(id) return lookupPerson(id).household end)
+
+	db:exec "begin;"
 	--Do Aging
 	_.each(working_set, function (id)
 		x = lookupPerson(id)
@@ -119,8 +122,10 @@ function simulate_year(log, year, locations)
 			end
 		end
 	end)
+	db:exec "end;"
 
 	--Do Adoption & Elder Caretaking
+	db:exec "begin;"
 	_.each(working_set, function(id)
 		local x = lookupPerson(id)
 		--Handle lonely elderly moving in with grown children
@@ -144,7 +149,7 @@ function simulate_year(log, year, locations)
 			end
 		end
 		--Handle orphans moving in with family members
-		if x.age < adulthood_age and x.orphaned and (not x.foster or (x.foster and not lookUpPerson(x.foster).alive)) then
+		if x.age < adulthood_age and x.orphaned and (not x.foster or (x.foster and not lookupPerson(x.foster).alive)) then
 			local live_with = _.sample(_.filter(relatives_by_distance(id, 0, 4, {}) ,function(cid) 
 					local adopter = lookupPerson(cid)
 					return adopter.age >= adulthood_age and adopter.alive
@@ -156,8 +161,10 @@ function simulate_year(log, year, locations)
 			end
 		end
 	end)
+	db:exec "end;"
 
 	--Do Marriage
+	db:exec "begin;"
 	_.forIn(
 		_.groupBy(working_set, function(id)
 			local x = lookupPerson(id)
@@ -217,8 +224,10 @@ function simulate_year(log, year, locations)
 			end
 		end
 	)
+	db:exec "end;"
 
 	-- Handle Affairs
+	db:exec "begin;"
 	_.forIn(
 		_.groupBy(working_set, 
 			function(id)
@@ -252,8 +261,10 @@ function simulate_year(log, year, locations)
 			end
 		end
 	)
+	db:exec "end;"
 
 	-- Handle Birth & Pregnancy
+	db:exec "begin;"
 	_.each(working_set, function(id)
 		local x = lookupPerson(id)
 		if x.alive 
@@ -290,16 +301,17 @@ function simulate_year(log, year, locations)
 		and x.married 
 		and x.gender == "F"
 		and x.fertile
-		and x.pregnant == false
+		and not x.pregnant
 		and x.spouse and lookupPerson(x.spouse).alive 
 		and math.random() < married_reproduction_chance then
-			print("Pregnancy")
 			--Became pregnant
 			modifyPerson(id,"pregnant",true)
 		end
 	end)
+	db:exec "end;"
 
 	-- Handle Divorces
+	db:exec "begin;"
 	local broken_homes = {}
 	_.forIn(household_bins, function(housemates, household_id) 
 		if math.random() < yearly_divorce_chance then
@@ -327,11 +339,14 @@ function simulate_year(log, year, locations)
 		end)
 
 		--Old Testament assumptions
-
 		modifyPerson(husband.id,"married",false )
 		modifyPerson(wife.id,"married",false)
-		table.insert(husband.divorces, wife.id)
-		table.insert(wife.divorces, husband.id)
+		local wife_divorce = lookupPerson(husband.id).divorces or {}
+		table.insert(wife_divorce, wife.id)		
+		local husband_divorce = lookupPerson(wife.id).divorces or {}
+		table.insert(husband_divorce, husband.id)
+		modifyPerson(husband.id, "divorces",husband_divorce)
+		modifyPerson(wife.id, "divorces",wife_divorce)
 		logEvent(log,year,"divorce",husband.id,wife.id)
 
 		local wifes_pater = wife.foster and wife.foster or wife.father 
@@ -355,6 +370,7 @@ function simulate_year(log, year, locations)
 			end
 		end)
 	end)
+	db:exec "end;"
 
 	--Cleanup working set: dead people lie in peace
 	working_set = _.filter(working_set, function(id)
@@ -362,14 +378,14 @@ function simulate_year(log, year, locations)
 		return lookupPerson(id).alive
 	end)
 
-	return working_set, locations
+	return working_set
 end
 
 --Simulate
 local log = assert(io.open("output/event.log", "w"))
 
 for year = 1, years_to_simulate do
-	working_set, locations = simulate_year(log, year, working_set, locations)
+	working_set = simulate_year(log, year, working_set, locations)
 	print("Year " .. year .. ". Working set is " .. #working_set)
 end
 log.close()
@@ -379,6 +395,9 @@ do --Draw Graphs
 		local x = lookupPerson(id)
 		local name = x.givennym .. "." .. x.patronym
 		local lifeborder = x.alive and "blue" or "gray"
+		if x.orphaned then
+			print("Orphan is " .. inspect(x))
+		end
 		local fill = x.orphaned and "orange" or (x.is_bastard_of and "red" or "white")
 		local gendershape = x.gender == "M" and "square" or "circle"
 		if #x.widowedBy > 0 then gendershape = x.gender == "M" and "Msquare" or "Mcircle" end
@@ -386,7 +405,7 @@ do --Draw Graphs
 	end
 	local function drawRelations(context, id, sameLoc, sameHouse)
 		local x = lookupPerson(id)
-		print("Drawing relation for: " .. inspect(x))
+		--print("Drawing relation for: " .. inspect(x))
 		if x.mother and lookupPerson(x.mother).alive and 
 			((sameLoc and x.location == lookupPerson(x.mother).location) or (not sameLoc)) and
 			((sameHouse and x.household == lookupPerson(x.mother).household) or (not sameHouse)) then
@@ -468,6 +487,7 @@ do --Draw Graphs
 	do --Draw Each Location on Own Map
 		local folks_by_location = _.groupBy(working_set, function(x) return locations[lookupPerson(x).location] end)
 		for location = 1, #locations do
+			print("DRAWING FOR LOCATION" .. location)
 			local g = assert(io.open("output/town_map_"..locations[location]..".viz", "w"))
 			g:write("strict digraph G {\n\tcompound=true;\n\toverlap=prism;")
 			drawFullLocation(g,location,folks_by_location[locations[location]],false)

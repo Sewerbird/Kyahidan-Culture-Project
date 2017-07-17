@@ -89,7 +89,7 @@ function random_person(new_id, location_id, household_id)
 		widowedBy = {},
 		age = 15,--math.random(10,30),
 		genetic = math.random(),
-		genome = mendel.randomGenome(),
+		genome = nil, --mendel.randomGenome(),
 		givennym = alphabet[math.random(1,26)],
 		patronym = lastnames[math.random(1,#lastnames)],
 		household = household_id,
@@ -122,7 +122,7 @@ function baby_person(mom,dad)
 		givennym = alphabet[math.random(1,26)],
 		patronym = dad.patronym,
 		genetic = (dad.genetic + mom.genetic + math.random())/3,
-		genome = mendel.reproduce(mom.genome, dad.genome),
+		genome = nil, --mendel.reproduce(mom.genome, dad.genome),
 		birthday = math.random() -- % through year e.g.: 0.088 is evening of February 1st
 	}
 end
@@ -143,6 +143,8 @@ local exported_fields = {
 	"mother",
 	"foster",
 	"spouse",
+	"fetus_is_bastard_of",
+	"divorces",
 	"children",
 	"widowedBy",
 	"age",
@@ -156,20 +158,22 @@ local exported_fields = {
 
 function ngr(x) 
 	if x == nil then 
-		return ""
+		return "NULL"
+	elseif 'boolean' == type(x) then
+		return x and 1 or 0
 	elseif 'table' == type(x) then
 		local z = _.reduce(x, function(acc,k)
 			if acc == "" then
-				return "\'" .. k .. "\'"
+				return k
 			else
-				return acc .. ",\'" .. k .. "\'"
+				return acc .. "," .. k
 			end
 		end,"")
-		return "[" .. z .. "]"
+		return "["..z.."]"
 	elseif tonumber(x) ~= nil then
 		return x
 	else 
-		return "\'"..tostring(x).."\'"
+		return tostring(x)
 	end 
 end
 
@@ -192,20 +196,29 @@ function lookupPerson(id)
 		for i = 1, #exported_fields do
 			local k = exported_fields[i]
 			local v = a[i]
-			if k == 'married' or k == 'pregnant' or k == 'fertile' or k == 'alive' then
-				v = (v == 1 and true or false)
-			elseif k == 'widowedBy' or k == 'children' or k == 'genome' then
+			if k == 'married' or k == 'pregnant' or k == 'fertile' or k == 'alive' or k == 'orphaned' then
+				if(v == 0 or v == "" or v == nil or v == 'false' or v == "0") then
+					v = false
+				else
+					v = true
+				end
+			elseif k == 'widowedBy' or k == 'children' or k == 'genome' or k == 'divorces' then
 				local t={} ; i=1
-		        for str in string.gmatch(v, "([^".."',".."]+)") do
-		        	str = str:gsub('\\[',""):gsub('\\]',"")
+		        for str in string.gmatch(v, "([^"..".".."]+)") do
+		        	str = str:gsub('\\[','')
+		        	str = str:gsub('\\]','')
 		        	if str ~= "" and str ~= "[" and str ~= "]" and str ~= "[]" then
-		                t[i] = str
+		        		if tonumber(str) ~= nil then
+		                	t[i] = tonumber(str)
+		                else
+		                	t[i] = tonumber(str)
+		                end
 		                i = i + 1
 		            end
 		        end
 		        v = t
 			end
-			if v == "nil" then
+			if v == "nil" or v == "NULL" or v == "" then
 				v = nil
 			end
 			result[k] = v
@@ -215,7 +228,12 @@ function lookupPerson(id)
 end
 
 function modifyPerson(id, key, value)
-	local cmd = string.format("UPDATE people SET %s = %s WHERE id = %i",key,ngr(value),id)
+	local cmd = ""
+	if type(value) == 'number' or type(value) == 'boolean' then
+		cmd = string.format("UPDATE people SET %s = %s WHERE id = %i",key,ngr(value),id)
+	else
+		cmd = string.format("UPDATE people SET %s = '%s' WHERE id = %i",key,ngr(value),id)
+	end
 	lookup_db:exec(cmd)
 	if lookup_db:errcode() > 0 then
 		error("ERROR modifying:" .. lookup_db:errmsg())
@@ -223,13 +241,12 @@ function modifyPerson(id, key, value)
 end
 
 function insertPerson(person)
-	print("INSERTING A PERSON")
 	local schema = _.reduce(exported_fields, function(acc, e) 
 		if acc == "" then return e else return acc .. ", " .. e end
 	end,"")
 	local cmd = string.format([[
 		INSERT INTO people (%s) 
-		VALUES (%i,"%s","%s","%s",%i,%i,%i,%i,%i, %s,%s,%s,%s, "%s","%s",%i,%f,"%s","%s","%s","%s",%i)
+		VALUES (%i,"%s","%s","%s",%i,%i,%i,%i,%i, %s,%s,%s,%s,%s, "%s","%s","%s",%i,%f,"%s","%s","%s","%s",%i)
 	]],
 		schema,
 			person.id,
@@ -245,6 +262,8 @@ function insertPerson(person)
 			person.mother or "NULL",
 			person.foster or "NULL",
 			person.spouse or "NULL",
+			person.fetus_is_bastard_of or "NULL",
+			ngr(person.divorces),
 			ngr(person.children),
 			ngr(person.widowedBy),
 			person.age,
