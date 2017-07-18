@@ -54,6 +54,7 @@ local locations = {"Aville","Burb","Chamlet"}
 
 local household_cntr = 1
 local people_cntr = 1
+
 for i = 1, people_population do
 	local friend = random_person(i,math.random(1,#locations),household_cntr)
 	household_cntr = household_cntr + 1
@@ -61,16 +62,13 @@ for i = 1, people_population do
 	insertPerson(friend)
 end
 
-function simulate_year(log, year, locations)
-	working_set = {}
-	for a in db:rows("SELECT id FROM people WHERE alive = 1") do
-		table.insert(working_set,a[1])
-	end
 
-	print("WORKING SET SIZE IS " .. #working_set)
+function simulate_year(log, year, locations)
+	working_set = getWorkingSet()
+
 	local household_bins = _.groupBy(working_set, function(id) return lookupPerson(id).household end)
 
-	db:exec "begin;"
+	
 	--Do Aging
 	_.each(working_set, function (id)
 		x = lookupPerson(id)
@@ -122,10 +120,10 @@ function simulate_year(log, year, locations)
 			end
 		end
 	end)
-	db:exec "end;"
+	
 
 	--Do Adoption & Elder Caretaking
-	db:exec "begin;"
+	
 	_.each(working_set, function(id)
 		local x = lookupPerson(id)
 		--Handle lonely elderly moving in with grown children
@@ -161,10 +159,10 @@ function simulate_year(log, year, locations)
 			end
 		end
 	end)
-	db:exec "end;"
+	
 
 	--Do Marriage
-	db:exec "begin;"
+	
 	_.forIn(
 		_.groupBy(working_set, function(id)
 			local x = lookupPerson(id)
@@ -224,10 +222,10 @@ function simulate_year(log, year, locations)
 			end
 		end
 	)
-	db:exec "end;"
+	
 
 	-- Handle Affairs
-	db:exec "begin;"
+	
 	_.forIn(
 		_.groupBy(working_set, 
 			function(id)
@@ -261,10 +259,10 @@ function simulate_year(log, year, locations)
 			end
 		end
 	)
-	db:exec "end;"
+	
 
 	-- Handle Birth & Pregnancy
-	db:exec "begin;"
+	
 	_.each(working_set, function(id)
 		local x = lookupPerson(id)
 		if x.alive 
@@ -308,10 +306,10 @@ function simulate_year(log, year, locations)
 			modifyPerson(id,"pregnant",true)
 		end
 	end)
-	db:exec "end;"
+	
 
 	-- Handle Divorces
-	db:exec "begin;"
+	
 	local broken_homes = {}
 	_.forIn(household_bins, function(housemates, household_id) 
 		if math.random() < yearly_divorce_chance then
@@ -370,7 +368,7 @@ function simulate_year(log, year, locations)
 			end
 		end)
 	end)
-	db:exec "end;"
+	
 
 	--Cleanup working set: dead people lie in peace
 	working_set = _.filter(working_set, function(id)
@@ -401,6 +399,7 @@ do --Draw Graphs
 		local fill = x.orphaned and "orange" or (x.is_bastard_of and "red" or "white")
 		local gendershape = x.gender == "M" and "square" or "circle"
 		if #x.widowedBy > 0 then gendershape = x.gender == "M" and "Msquare" or "Mcircle" end
+		print("X is " .. inspect(x))
 		context:write(whitespaceprefix..id.." [color="..lifeborder..",style=\"filled\",fillcolor="..fill..",shape="..gendershape..",label=<<FONT POINT-SIZE=\"120\">"..name.."("..x.age..")</FONT><BR ALIGN=\"CENTER\"/>"..mendel.describeFace(name, x.genome)..">];")
 	end
 	local function drawRelations(context, id, sameLoc, sameHouse)

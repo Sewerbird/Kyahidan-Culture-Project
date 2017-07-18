@@ -19,18 +19,18 @@ lastnames_file.close()
 
 --Utility Functions (Generation)
 
-function get_living_descendents(people, id, depth, acc)
-	local me = people[id]
+function get_living_descendents(id, depth, acc)
+	local me = lookupPerson(id)
 	if acc[depth] == nil then acc[depth] = {} end
 	if acc.count == nil then acc.count = 0 end
 
 	if #me.children > 0 then
 		_.each(me.children, function(child) 
-			if people[child].alive then 
+			if lookupPerson(child).alive then 
 				table.insert(acc[depth],child) 
 				acc.count = acc.count + 1
 			end
-			acc = get_living_descendents(people, child, depth+1, acc) 
+			acc = get_living_descendents(child, depth+1, acc) 
 		end)
 	end
 	return acc
@@ -89,7 +89,7 @@ function random_person(new_id, location_id, household_id)
 		widowedBy = {},
 		age = 15,--math.random(10,30),
 		genetic = math.random(),
-		genome = nil, --mendel.randomGenome(),
+		genome = mendel.randomGenome(),
 		givennym = alphabet[math.random(1,26)],
 		patronym = lastnames[math.random(1,#lastnames)],
 		household = household_id,
@@ -122,7 +122,7 @@ function baby_person(mom,dad)
 		givennym = alphabet[math.random(1,26)],
 		patronym = dad.patronym,
 		genetic = (dad.genetic + mom.genetic + math.random())/3,
-		genome = nil, --mendel.reproduce(mom.genome, dad.genome),
+		genome = mendel.reproduce(mom.genome, dad.genome),
 		birthday = math.random() -- % through year e.g.: 0.088 is evening of February 1st
 	}
 end
@@ -177,8 +177,45 @@ function ngr(x)
 	end 
 end
 
+function ogr(x)
+	local result = {}
+	for i = 1, #exported_fields do
+		local k = exported_fields[i]
+		local v = x[i]
+		if k == 'married' or k == 'pregnant' or k == 'fertile' or k == 'alive' or k == 'orphaned' then
+			if(v == 0 or v == "" or v == nil or v == 'false' or v == "0") then
+				v = false
+			else
+				v = true
+			end
+		elseif k == 'widowedBy' or k == 'children' or k == 'genome' or k == 'divorces' then
+			local t={} ; i=1
+	        for str in string.gmatch(v, "([^"..",".."]+)") do
+	        	str = str:gsub('\\[','')
+	        	str = str:gsub('\\]','')
+	        	if str ~= "" and str ~= "[" and str ~= "]" and str ~= "[]" then
+	        		if tonumber(str) ~= nil then
+	                	t[i] = tonumber(str)
+	                else
+	                	t[i] = str
+	                end
+	                i = i + 1
+	            end
+	        end
+	        v = t
+		end
+		if v == "nil" or v == "NULL" or v == "" then
+			v = nil
+		end
+		result[k] = v
+	end
+	return result
+end
+
 local lookup_db = nil
 local lookup_cache = nil
+local lookup_cache_size = 0
+local lookup_cache_maximum_size = 20000
 
 function setupLookup(db, cache)
 	lookup_db = db 
@@ -188,46 +225,54 @@ function setupLookup(db, cache)
 		if acc == "" then return "\""..e.."\"" else return acc .. ", " .. "\""..e.."\"" end
 	end,"")
 	lookup_db:exec(string.format("CREATE TABLE people ( %s )",schema))
+	lookup_db:exec(string.format("CREATE INDEX people_id_idx ON people(id)"))
+end
+
+function cacheSize()
+	return lookup_cache_size
+end
+
+function getWorkingSet()
+	return _.filter(_.keys(lookup_cache), function(key)
+		return lookup_cache[key].alive
+	end)
+	--[[
+	for a in db:rows("SELECT id FROM people WHERE alive = 1") do
+		table.insert(working_set,a[1])
+	end
+	]]
+end
+
+function pruneCache()
+	--print("PERFORMING CACHE PRUNE: " .. lookup_cache_size .. " > " .. lookup_cache_maximum_size)
+	--lookup_cache = {}
+	--lookup_cache_size = 0
 end
 
 function lookupPerson(id)
+	if lookup_cache and lookup_cache[id] ~= nil then
+		return lookup_cache[id]
+	else
+		return nil
+	end
+	--[[
 	for a in lookup_db:rows(string.format("SELECT * FROM people WHERE id = %i LIMIT 1", id)) do
-		local result = {}
-		for i = 1, #exported_fields do
-			local k = exported_fields[i]
-			local v = a[i]
-			if k == 'married' or k == 'pregnant' or k == 'fertile' or k == 'alive' or k == 'orphaned' then
-				if(v == 0 or v == "" or v == nil or v == 'false' or v == "0") then
-					v = false
-				else
-					v = true
-				end
-			elseif k == 'widowedBy' or k == 'children' or k == 'genome' or k == 'divorces' then
-				local t={} ; i=1
-		        for str in string.gmatch(v, "([^"..".".."]+)") do
-		        	str = str:gsub('\\[','')
-		        	str = str:gsub('\\]','')
-		        	if str ~= "" and str ~= "[" and str ~= "]" and str ~= "[]" then
-		        		if tonumber(str) ~= nil then
-		                	t[i] = tonumber(str)
-		                else
-		                	t[i] = tonumber(str)
-		                end
-		                i = i + 1
-		            end
-		        end
-		        v = t
-			end
-			if v == "nil" or v == "NULL" or v == "" then
-				v = nil
-			end
-			result[k] = v
+		local result = ogr(a)
+		lookup_cache[id] = result
+		lookup_cache_size = lookup_cache_size + 1
+		if lookup_cache_size > lookup_cache_maximum_size then
+			pruneCache()
 		end
 		return result
 	end
+	]]
 end
 
 function modifyPerson(id, key, value)
+	if lookup_cache and lookup_cache[id] then
+		lookup_cache[id][key] = value
+	end
+	--[[
 	local cmd = ""
 	if type(value) == 'number' or type(value) == 'boolean' then
 		cmd = string.format("UPDATE people SET %s = %s WHERE id = %i",key,ngr(value),id)
@@ -238,16 +283,25 @@ function modifyPerson(id, key, value)
 	if lookup_db:errcode() > 0 then
 		error("ERROR modifying:" .. lookup_db:errmsg())
 	end
+	--]]
 end
 
 function insertPerson(person)
+	if lookup_cache and not lookup_cache[person.id] then
+		lookup_cache[person.id] = person
+		lookup_cache_size = lookup_cache_size + 1
+		if lookup_cache_size > lookup_cache_maximum_size then
+			pruneCache()
+		end
+	end
+	--[[
 	local schema = _.reduce(exported_fields, function(acc, e) 
 		if acc == "" then return e else return acc .. ", " .. e end
 	end,"")
 	local cmd = string.format([[
 		INSERT INTO people (%s) 
 		VALUES (%i,"%s","%s","%s",%i,%i,%i,%i,%i, %s,%s,%s,%s,%s, "%s","%s","%s",%i,%f,"%s","%s","%s","%s",%i)
-	]],
+	]xx],
 		schema,
 			person.id,
 			person.givennym,
@@ -279,6 +333,7 @@ function insertPerson(person)
 	if lookup_db:errcode() > 0 then
 		error("ERROR " .. lookup_db:errcode() .. ": " .. lookup_db:errmsg())
 	end
+	--]]
 end
 
 function logEvent(logfile, year, type, ...)

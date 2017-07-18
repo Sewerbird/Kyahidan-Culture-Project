@@ -1,4 +1,5 @@
 local _ = require "lib/shimmed"
+local inspect = require "lib/inspect"
 
 local mendel = {}
 
@@ -108,6 +109,9 @@ function mendel.reproduce(personA, personB)
 	--fertilization
 	return _.map(gameteA, function(alleleA, gene)
 		local alleleB = gameteB[gene]
+		if alleleB == nil then
+			print(inspect(personA) .. "::" .. inspect(personB))
+		end
 		return alleleA .. alleleB
 	end)
 
