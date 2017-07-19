@@ -156,8 +156,45 @@ local exported_fields = {
 	"location"
 }
 
-function ngr(x) 
+function uncgr(x) --turn custom-csv form into lua
+	if x == "NULL" then
+		return nil
+	elseif x == "TRUE" then
+		return true
+	elseif x == "FALSE" then
+		return false
+	elseif 'table' == type(x) then
+		return _.map(x, function(e) return uncgr(e) end)
+	elseif tonumber(x) ~= nil then
+		return tonumber(x)
+	else
+		return x
+	end
+end
+
+function cgr(x) --format lua value to custom-csv friendly form
 	if x == nil then 
+		return "NULL"
+	elseif 'boolean' == type(x) then
+		return x and "TRUE" or "FALSE"
+	elseif 'table' == type(x) then
+		local z = _.reduce(x, function(acc,k)
+			if acc == "" then
+				return k
+			else
+				return acc .. ":" .. k
+			end
+		end,"")
+		return z
+	elseif tonumber(x) ~= nil then
+		return x
+	else 
+		return tostring(x)
+	end
+end
+
+function ngr(x) --format lua value to sequel friendly form 
+ 	if x == nil then 
 		return "NULL"
 	elseif 'boolean' == type(x) then
 		return x and 1 or 0
@@ -174,7 +211,7 @@ function ngr(x)
 		return x
 	else 
 		return tostring(x)
-	end 
+	end
 end
 
 function ogr(x)
@@ -346,14 +383,36 @@ function export_people_csv(path)
 	print("Performing census dump to ".. path)
 	local f = assert(io.open(path, "w"))
 	f:write(_.reduce(exported_fields, function(str, field, i, arr) 
-		if i == #arr then return str .. "\""..field.."\"" end
-		return str .. "\"" .. field .. "\", " 
+		return i==#arr and str .. field or str .. field .. ","
 	end, ""))
 	_.each(lookup_cache, function(x,i)
 		if math.mod(i,10000) == 0 then print(i .. "/" .. #lookup_cache) end 
 		f:write(_.reduce(exported_fields, function(str, field, i, arr) 
-			if i == #arr then return str .. ngr(x[field]) end
-			return str .. ngr(x[field]) .. ", " 
+			if i == #arr then return str .. cgr(x[field]) end
+			return str .. cgr(x[field]) .. "," 
 		end,"\n")) end)
 	f.close()
+end
+
+function import_people_csv(path, filter_fn)
+	local csv = assert(io.open(path, "r"))
+	local ppl = {}
+	for line in csv:lines() do
+		local t={}; i=1
+		for str in string.gmatch(line, "([^,]*)") do
+			local key = exported_fields[i]
+			local c={}
+			local isArray = false
+			for z in string.gmatch(str, "([^:]+)") do
+				isArray = true
+				table.insert(c,z)
+			end
+			c = isArray and c[1] or c
+			print(string.format("Setting %s to %s",exported_fields[i],inspect(uncgr(c))))
+			t[exported_fields[i]] = uncgr(c)
+			i = i + 1
+		end
+		table.insert(ppl,t)
+	end
+	return ppl
 end
