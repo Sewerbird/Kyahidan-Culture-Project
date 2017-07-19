@@ -217,15 +217,15 @@ local lookup_cache = nil
 local lookup_cache_size = 0
 local lookup_cache_maximum_size = 20000
 
-function setupLookup(db, cache)
-	lookup_db = db 
-	lookup_cache = cache 
+function setupLookup(filename)
+	--lookup_db = db 
+	lookup_cache = {} 
 
 	local schema = _.reduce(exported_fields, function(acc, e) 
 		if acc == "" then return "\""..e.."\"" else return acc .. ", " .. "\""..e.."\"" end
 	end,"")
-	lookup_db:exec(string.format("CREATE TABLE people ( %s )",schema))
-	lookup_db:exec(string.format("CREATE INDEX people_id_idx ON people(id)"))
+	--lookup_db:exec(string.format("CREATE TABLE people ( %s )",schema))
+	--lookup_db:exec(string.format("CREATE INDEX people_id_idx ON people(id)"))
 end
 
 function cacheSize()
@@ -233,9 +233,9 @@ function cacheSize()
 end
 
 function getWorkingSet()
-	return _.filter(_.keys(lookup_cache), function(key)
-		return lookup_cache[key].alive
-	end)
+	return _.map(_.filter(lookup_cache, function(e)
+		return e.alive
+	end), function (e) return e.id end)
 	--[[
 	for a in db:rows("SELECT id FROM people WHERE alive = 1") do
 		table.insert(working_set,a[1])
@@ -341,15 +341,16 @@ function logEvent(logfile, year, type, ...)
 	logfile:write(ngr(year)..","..ngr(type)..","..ngr(data).."\n")
 end
 
-function export_people_csv(path, people)
+function export_people_csv(path)
 	--Perform data dump
-
+	print("Performing census dump to ".. path)
 	local f = assert(io.open(path, "w"))
 	f:write(_.reduce(exported_fields, function(str, field, i, arr) 
 		if i == #arr then return str .. "\""..field.."\"" end
 		return str .. "\"" .. field .. "\", " 
 	end, ""))
-	_.each(people, function(x) 
+	_.each(lookup_cache, function(x,i)
+		if math.mod(i,10000) == 0 then print(i .. "/" .. #lookup_cache) end 
 		f:write(_.reduce(exported_fields, function(str, field, i, arr) 
 			if i == #arr then return str .. ngr(x[field]) end
 			return str .. ngr(x[field]) .. ", " 
