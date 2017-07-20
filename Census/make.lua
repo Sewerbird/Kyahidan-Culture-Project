@@ -1,6 +1,6 @@
 --Imports
 local inspect = require 'lib/inspect'
-local _ = require 'lib/lodash'
+local _ = require 'lib/shimmed'
 local mendel = require 'mendel'
 require 'make_utils'
 
@@ -374,3 +374,7 @@ for year = 1, years_to_simulate do
 end
 export_people_csv("output/census.csv")
 log.close()
+
+local zz = import_people_csv("output/census.csv",function(e) return e.spouse end)
+
+print(inspect(_.sample(zz)))

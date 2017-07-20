@@ -163,6 +163,8 @@ function uncgr(x) --turn custom-csv form into lua
 		return true
 	elseif x == "FALSE" then
 		return false
+	elseif x == "ETBL" then
+		return {}
 	elseif 'table' == type(x) then
 		return _.map(x, function(e) return uncgr(e) end)
 	elseif tonumber(x) ~= nil then
@@ -179,12 +181,9 @@ function cgr(x) --format lua value to custom-csv friendly form
 		return x and "TRUE" or "FALSE"
 	elseif 'table' == type(x) then
 		local z = _.reduce(x, function(acc,k)
-			if acc == "" then
-				return k
-			else
-				return acc .. ":" .. k
-			end
+			return acc .. ":" .. k
 		end,"")
+		if z == "" then z = "ETBL" end
 		return z
 	elseif tonumber(x) ~= nil then
 		return x
@@ -399,20 +398,28 @@ function import_people_csv(path, filter_fn)
 	local ppl = {}
 	for line in csv:lines() do
 		local t={}; i=1
-		for str in string.gmatch(line, "([^,]*)") do
-			local key = exported_fields[i]
-			local c={}
-			local isArray = false
-			for z in string.gmatch(str, "([^:]+)") do
-				isArray = true
-				table.insert(c,z)
+		for str in string.gmatch(line, "([^,]+)") do
+			local c = nil
+			local j = 0
+			for k in string.gmatch(str,":") do
+				j = 1; break
 			end
-			c = isArray and c[1] or c
-			print(string.format("Setting %s to %s",exported_fields[i],inspect(uncgr(c))))
-			t[exported_fields[i]] = uncgr(c)
+			if j > 0 then
+				c={}
+				--array
+				for z in string.gmatch(str, "([^:]+)") do
+					table.insert(c,uncgr(z))
+				end
+			else
+				--value
+				c=uncgr(str)
+			end
+			t[exported_fields[i]] = c
 			i = i + 1
 		end
-		table.insert(ppl,t)
+		if filter_fn == nil or (filter_fn ~= nil and filter_fn(t)) then
+			table.insert(ppl,t)
+		end
 	end
 	return ppl
 end
