@@ -1,8 +1,10 @@
 --Imports
 local inspect = require 'lib/inspect'
 local _ = require 'lib/shimmed'
-local mendel = require 'mendel'
-require 'make_utils'
+local mendel = require 'lib/mendel'
+--local luasql = require("luasql.postgres")
+--envv = assert ( luasql.postgres())
+--con = assert (envv:connect('eic_lisa_development','eic','eic',"localhost",5432))require 'make_utils'
 
 --Configuration
 

@@ -1,8 +1,8 @@
 local _ = require 'lib/lodash'
 local inspect = require 'lib/inspect'
-local mendel = require 'mendel'
+local mendel = require 'lib/mendel'
 
-local lastnames_path = "CSV_Database_of_Last_Names.csv"
+local lastnames_path = "data/CSV_Database_of_Last_Names.csv"
 
 --Load helper data
 local alphabet = {"A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"}
@@ -254,12 +254,15 @@ local lookup_cache_size = 0
 local lookup_cache_maximum_size = 20000
 
 function setupLookup(filename)
-	--lookup_db = db 
 	lookup_cache = {} 
-
-	local schema = _.reduce(exported_fields, function(acc, e) 
-		if acc == "" then return "\""..e.."\"" else return acc .. ", " .. "\""..e.."\"" end
-	end,"")
+	
+	if filename then
+		lookup_cache = import_people_csv(filename,nil)
+	end
+	--lookup_db = db 
+	--local schema = _.reduce(exported_fields, function(acc, e) 
+	--	if acc == "" then return "\""..e.."\"" else return acc .. ", " .. "\""..e.."\"" end
+	--end,"")
 	--lookup_db:exec(string.format("CREATE TABLE people ( %s )",schema))
 	--lookup_db:exec(string.format("CREATE INDEX people_id_idx ON people(id)"))
 end
@@ -270,7 +273,7 @@ end
 
 function getWorkingSet()
 	return _.map(_.filter(lookup_cache, function(e)
-		return e.alive
+		return e.alive == true
 	end), function (e) return e.id end)
 	--[[
 	for a in db:rows("SELECT id FROM people WHERE alive = 1") do
