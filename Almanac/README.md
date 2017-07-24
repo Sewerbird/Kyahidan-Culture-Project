@@ -1,6 +1,6 @@
 # Kyahidan Almanac
 
-The almanac covers a typical year of Kyahidan, and reports on the cyclical phenomenon of both the Kyahidan culture as well as its climate. Astrological events, festivals, holidays, memorials, marine migrations, rituals, horoscopes: all these things belong here, in which is essentially a detailed calendar. A few witticisms can happily sneaked in to 'fill space', along with Magazine references.
+The almanac covers a typical year of Kyahida, and reports on the cyclical phenomenon of both the Kyahidan culture as well as its climate. Astrological events, festivals, holidays, memorials, marine migrations, rituals, horoscopes: all these things belong here, in which is essentially a detailed calendar. A few witticisms can happily sneaked in to 'fill space', along with Magazine references.
 
 ## Generation Approach
 

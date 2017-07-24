@@ -15,7 +15,7 @@ var params = {
   "zipf_population_variability" : 0.05,
   "everest_altitude" : 6000,
   "planetary_radius" : 125,//2000
-  "latitudinal_fix" : -Math.PI/2
+  "latitudinal_fix" : -Math.PI/6
 }
 
 //Set Seed
@@ -48,7 +48,7 @@ function generate()
     width : 250,
     height : 250,
     projection : 'orthographic',
-    lat: 0,//Math.PI/2,
+    lat: Math.PI/2,
     lng: 0.0
   }
   output_gif(filename, camera);
@@ -206,17 +206,21 @@ function draw_ortho(ctx, camera)
       var coord = pxToLatLng_Orthographic(x-camera.width/2,y-camera.height/2,params.planetary_radius,camera);
       altitude = getCoordinateInfo(coord).altitude
       var val = altitude / params.everest_altitude
-      if(val < 0.3 )
+      if(val < 0.3 )//30% land coverage
       {
+				//Sea ice
         if(coord.lat > Math.PI/2 - Math.PI/8)
           drawPixel(ctx,x,y,1.0,1.0,1.0)
+				//Open water
         else
           drawPixel(ctx,x,y,0.1,0.1,0.8);
       }
       else if(!val)
+				//Space
         drawPixel(ctx,x,y,0.3,0.3,0.3);
       else
-        drawPixel(ctx,x,y,1.0,val,val);
+				//Land
+        drawPixel(ctx,x,y,val,0.5,val);
     }
   }
 }
