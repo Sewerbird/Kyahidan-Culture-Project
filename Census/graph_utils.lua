@@ -12,7 +12,8 @@ function drawPerson(context, id, whitespaceprefix)
 		" [color="..lifeborder..
 		",style=filled, fillcolor="..fill..
 		",shape="..gendershape..
-		",label=<<FONT POINT-SIZE=\"120\">"..name.."("..x.age..")</FONT><BR ALIGN=\"CENTER\"/>"..mendel.describeFace(name, x.genome)..">];")
+		--",label=<<FONT POINT-SIZE=\"120\">"..name.."("..x.age..")</FONT><BR ALIGN=\"CENTER\"/>"..mendel.describeFace(name, x.genome)..">];")
+    ",label=\""..name.."("..x.age..")\"]")
 end
 function drawRelations(context, id, sameLoc, sameHouse)
 	local x = lookupPerson(id)

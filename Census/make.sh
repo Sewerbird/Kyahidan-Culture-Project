@@ -1,3 +1,3 @@
 #rm -r output
 #mkdir output
-luajit make.lua 10 100; 
+luajit make.lua 100 200; 

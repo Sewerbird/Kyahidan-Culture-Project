@@ -9,7 +9,7 @@
 -- ================
 -- Private helpers
 -- ================
-
+local _ = require("lib/shimmed")
 local setmetatable = setmetatable
 local tostring     = tostring
 local assert       = assert
@@ -202,6 +202,12 @@ end
 -- print(t) -- print the triangle members p1, p2 and p3
 --
 function Triangle:__init(p1, p2, p3)
+  if isFlatAngle(p1,p2,p3) then
+    p1.x = p1.x + math.random() * 0.1;
+    p1.y = p1.y + math.random() * 0.1
+    p2.x = p2.x + math.random() * 0.1; 
+    p2.y = p2.y + math.random() * 0.1;
+  end
   assert(not isFlatAngle(p1, p2, p3), ("angle (p1, p2, p3) is flat:\n  %s\n  %s\n  %s")
     :format(tostring(p1), tostring(p2), tostring(p3)))
   self.p1, self.p2, self.p3 = p1, p2, p3
@@ -232,6 +238,10 @@ end
 
 function Triangle:getSides()
 	return {self.e1,self.e2,self.e3}
+end
+
+function Triangle:getPoints()
+  return {self.e1.p1,self.e2.p1,self.e3.p1}
 end
 
 --- Returns the length of the edges
@@ -367,7 +377,7 @@ local Delaunay = {
 function Delaunay.triangulate(...)
   local vertices = {...}
   local nvertices = #vertices
-  assert(nvertices > 2, "Cannot triangulate, needs more than 3 vertices")
+  assert(nvertices > 2, "Cannot triangulate, needs more than 3 vertices.")
   if nvertices == 3 then
     return {Triangle(unpack(vertices))}
   end
@@ -451,5 +461,54 @@ function Delaunay.triangulate(...)
   return triangles
 
 end
+--Create a non-repeated list of edges ready for squiggling
+function Delaunay.getDelaunayEdges(delaunay_triangles)
+  local edges_drawn = {}
+  print("Given " .. #delaunay_triangles .. " triangles, getting unique edges")
+  local dedges = 	_.flatten(_.map(delaunay_triangles,function(tri) 
+    return _.map(_.filter(tri:getSides(),function(edge)
+      if not _.some(edges_drawn, function(e) return e:same(edge) end) then
+        table.insert(edges_drawn,edge)
+        return true
+      end
+      return false
+    end), function(edge)
+        return {{edge.p1.x,edge.p1.y},{edge.p2.x,edge.p2.y}}
+    end)
+  end))
+  return edges_drawn
+end
+
+--Construct voronoi edges
+function Delaunay.getVoronoiEdges(delaunay_triangles)
+  local vedges_drawn = {}
+  local circumcenters = _.map(delaunaytriangles,function(tri) return delaunay.Point(tri:getCircumCenter()) end)
+  _.each(circumcenters, function(cc,i)
+    local my_tri = triangles[i]
+    _.each(my_tri:getSides(),function(edge) 
+      --get the other tri with this side
+      _.find(triangles,function(o_tri)
+        local match = _.find(o_tri:getSides(), function(o_edge) 
+          return o_edge:same(edge)
+        end)
+        if match then
+          if not _.some(vedges_drawn, function(vedge) return vedge:same(match) end) then
+            local o_cc = delaunay.Point(o_tri:getCircumCenter())
+            table.insert(vedges_drawn,delaunay.Edge(cc,o_cc))
+            return true
+          else
+            return true
+          end
+        else
+          return false
+        end
+      end)
+    end)
+  end)
+  return _.map(vedges_drawn, function(edge) 
+    return {{edge.p1.x,edge.p1.y},1/4,{edge.p2.x,edge.p2.y}} 
+  end)
+end
+
 
 return Delaunay

@@ -62,12 +62,13 @@ function squiggleShape(input,iterations)
 end
 
 function drawPath(points, style)
-  style = style and style or [[fill:none;stroke:black;stroke-width:0.25px;]]
-	local sX = points[1][1][1]
-	local sY = points[1][2][1]
+  style = style and style or [[fill:none;stroke:black;stroke-width:0.01px;]]
+  print("POint is " .. inspect(points))
+	local sX = points[1][1]
+	local sY = points[1][2]
 	return (_.reduce(points, function(acc,e,i)
-		return acc .. " L " .. e[1][1] .. " " .. e[2][1]
-	end, [[<path style="]] .. style .. [[" d="M ]] .. sX .. [[ ]] .. sY .. [[ L ]] .. sX .. " " .. sY) .. [[" />]])
+		return acc .. " L " .. e[1] .. " " .. e[2]
+	end, [[<path style="]] .. style .. [[" d="M ]] .. sX .. [[ ]] .. sY .. [[ L ]] .. sX .. " " .. sY) .. [[Z" />]])
 end
 
 function makeSquiggleSVG(filepath, viewbox, lines, roughness)
